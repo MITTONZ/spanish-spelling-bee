@@ -1,0 +1,1565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Spelling Bee ES" />
+    <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="icon" type="image/png" href="icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <title>Abeja de Ortografía — Spanish Spelling Bee (650 Palabras)</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --primary: #f59e0b;
+      --primary-dark: #d97706;
+      --indigo: #4f46e5;
+      --indigo-light: #eef2ff;
+      --green: #10b981;
+      --green-light: #d1fae5;
+      --red: #ef4444;
+      --red-light: #fee2e2;
+      --yellow-light: #fef3c7;
+      --border: #e2e8f0;
+      --shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Rounded", "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(135deg, #fffbeb 0%, #f0f9ff 100%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .app-container {
+      width: 100%;
+      max-width: 860px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    /* Header & Stats */
+    .header {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 14px 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 2px solid #fef3c7;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .bee-icon {
+      font-size: 34px;
+      line-height: 1;
+      background: #fef3c7;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .brand h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      color: #1e293b;
+    }
+    .brand p {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .stats-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .stat-pill {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+    }
+    .tab-btn {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--indigo);
+      color: white;
+      border-color: var(--indigo);
+    }
+
+    /* Controls / Level Filter Bar */
+    .controls-card {
+      background: var(--card);
+      border-radius: 18px;
+      padding: 12px 16px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .level-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .pill-btn {
+      border: 2px solid var(--border);
+      background: white;
+      color: var(--text);
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .pill-btn.active {
+      background: #fef3c7;
+      border-color: var(--primary);
+      color: #92400e;
+    }
+    .voice-settings {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    select.voice-select {
+      padding: 7px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 13px;
+      background: #f8fafc;
+      color: var(--text);
+      max-width: 210px;
+    }
+
+    /* Main Flashcard */
+    .flashcard {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      border: 2px solid #f1f5f9;
+    }
+    .card-top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .badge-level {
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-facil { background: #dcfce7; color: #166534; }
+    .badge-medio { background: #fef3c7; color: #92400e; }
+    .badge-avanzado { background: #fee2e2; color: #991b1b; }
+
+    .star-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 5px 10px;
+      font-size: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--muted);
+    }
+    .star-btn.starred {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #b45309;
+    }
+
+    /* Big Play Buttons */
+    .play-zone {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin: 4px 0;
+    }
+    .btn-play-main {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      border: none;
+      border-radius: 20px;
+      padding: 18px 32px;
+      font-size: 22px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 20px -4px rgba(245, 158, 11, 0.45);
+      transition: transform 0.1s;
+    }
+    .btn-play-main:active { transform: scale(0.97); }
+    .btn-play-sub {
+      background: #f8fafc;
+      color: #334155;
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 18px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-play-sub:active { transform: scale(0.97); }
+
+    /* Hints Row */
+    .hints-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .hint-chip {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .hint-box {
+      background: #fffbeb;
+      border: 1px dashed #f59e0b;
+      color: #92400e;
+      padding: 8px 16px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      display: none;
+    }
+
+    /* Letter Slots Display */
+    .word-slots {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin: 6px 0;
+      min-height: 58px;
+    }
+    .slot {
+      width: 44px;
+      height: 54px;
+      border-radius: 12px;
+      border: 2px solid #cbd5e1;
+      background: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text);
+      position: relative;
+      transition: all 0.15s;
+    }
+    .slot.active-cursor {
+      border-color: var(--indigo);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+      background: white;
+    }
+    .slot.correct {
+      background: var(--green-light);
+      border-color: var(--green);
+      color: #065f46;
+    }
+    .slot.almost {
+      background: var(--yellow-light);
+      border-color: var(--primary);
+      color: #92400e;
+    }
+    .slot.wrong {
+      background: var(--red-light);
+      border-color: var(--red);
+      color: #991b1b;
+    }
+
+    /* Input Mode Switcher */
+    .mode-switcher {
+      display: flex;
+      gap: 8px;
+      background: #f1f5f9;
+      padding: 5px;
+      border-radius: 14px;
+    }
+    .mode-tab {
+      border: none;
+      background: transparent;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .mode-tab.active {
+      background: white;
+      color: var(--text);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+
+    /* Voice Recording Section */
+    .voice-panel {
+      width: 100%;
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+    .record-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn-record {
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 26px;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 16px -3px rgba(239, 68, 68, 0.4);
+    }
+    .btn-record.recording {
+      background: #dc2626;
+      animation: pulse 1.2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+      70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .voice-help {
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+      max-width: 580px;
+      line-height: 1.4;
+    }
+    .transcript-box {
+      width: 100%;
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 14px;
+      font-size: 14px;
+      color: #334155;
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .audio-playback-bar {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      width: 100%;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border);
+    }
+
+    /* Touch Keyboard Section */
+    .keyboard-panel {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+    }
+    .kb-row {
+      display: flex;
+      gap: 6px;
+      justify-content: center;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    .kb-key {
+      min-width: 46px;
+      height: 48px;
+      padding: 0 10px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      border-bottom: 3px solid #94a3b8;
+      background: white;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+    .kb-key:active {
+      transform: translateY(2px);
+      border-bottom-width: 1px;
+    }
+    .kb-key.accent-key {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      border-bottom-color: #d97706;
+      color: #92400e;
+    }
+    .kb-key.special-key {
+      background: #e0e7ff;
+      border-color: #818cf8;
+      border-bottom-color: #4f46e5;
+      color: #3730a3;
+    }
+    .kb-key.action-key {
+      background: #f1f5f9;
+      font-size: 15px;
+      padding: 0 14px;
+    }
+
+    /* Action Footer Buttons */
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      width: 100%;
+      margin-top: 4px;
+    }
+    .btn-check {
+      background: var(--indigo);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 28px;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 16px -3px rgba(79, 70, 229, 0.35);
+    }
+    .btn-reveal {
+      background: white;
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 20px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-next {
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      padding: 14px 26px;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 6px 16px -3px rgba(16, 185, 129, 0.35);
+    }
+
+    /* Result / Feedback Banner */
+    .feedback-card {
+      width: 100%;
+      border-radius: 18px;
+      padding: 16px 20px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+    .feedback-card.success {
+      background: #ecfdf5;
+      border: 2px solid #10b981;
+      color: #065f46;
+    }
+    .feedback-card.error {
+      background: #fef2f2;
+      border: 2px solid #ef4444;
+      color: #991b1b;
+    }
+    .feedback-card.neutral {
+      background: #f8fafc;
+      border: 2px solid #cbd5e1;
+      color: #1e293b;
+    }
+    .feedback-title {
+      font-size: 20px;
+      font-weight: 800;
+    }
+    .answer-word-display {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #0f172a;
+      background: white;
+      padding: 8px 22px;
+      border-radius: 14px;
+      border: 2px solid #e2e8f0;
+    }
+    .phonetic-script {
+      font-size: 15px;
+      font-weight: 700;
+      color: #4f46e5;
+      background: #eef2ff;
+      padding: 8px 14px;
+      border-radius: 10px;
+      line-height: 1.5;
+    }
+    .self-grade-btns {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    /* Word List / Dictionary View */
+    .list-view {
+      display: none;
+      background: var(--card);
+      border-radius: 24px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      flex-direction: column;
+      gap: 14px;
+    }
+    .search-bar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      border: 2px solid var(--border);
+      font-size: 16px;
+    }
+    .word-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
+      gap: 10px;
+      max-height: 62vh;
+      overflow-y: auto;
+      padding: 4px;
+    }
+    .word-item {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .word-item:hover {
+      border-color: var(--primary);
+      background: #fffbeb;
+    }
+    .word-item-text {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .word-item-lvl {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 99px;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Header -->
+    <header class="header">
+      <div class="brand">
+        <div class="bee-icon">🐝</div>
+        <div>
+          <h1>Abeja de Ortografía</h1>
+          <p>650 Palabras Oficiales • Español</p>
+        </div>
+      </div>
+      <div class="stats-bar">
+        <div class="stat-pill" title="Racha actual">🔥 <span id="statStreak">0</span></div>
+        <div class="stat-pill" title="Palabras correctas">✅ <span id="statCorrect">0</span></div>
+        <div class="stat-pill" title="Palabras para repasar">⭐ <span id="statReview">0</span></div>
+        <div class="nav-tabs">
+          <button class="tab-btn active" id="tabPracticeBtn" onclick="switchMainTab('practice')">🎯 Practicar</button>
+          <button class="tab-btn" id="tabListBtn" onclick="switchMainTab('list')">📖 Lista (650)</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filter & Voice Settings -->
+    <section class="controls-card">
+      <div class="level-pills">
+        <button class="pill-btn active" data-filter="facil" onclick="setFilter('facil')">🟢 Fácil (150)</button>
+        <button class="pill-btn" data-filter="medio" onclick="setFilter('medio')">🟡 Medio (300)</button>
+        <button class="pill-btn" data-filter="avanzado" onclick="setFilter('avanzado')">🔴 Avanzado (200)</button>
+        <button class="pill-btn" data-filter="all" onclick="setFilter('all')">📚 Todas (650)</button>
+        <button class="pill-btn" data-filter="tildes" onclick="setFilter('tildes')">✨ Tildes / Ü / Ñ</button>
+        <button class="pill-btn" data-filter="trampas" onclick="setFilter('trampas')">🧠 H / B-V / C-S-Z / G-J</button>
+        <button class="pill-btn" data-filter="review" onclick="setFilter('review')">⭐ Repasar (<span id="pillReviewCount">0</span>)</button>
+      </div>
+      <div class="voice-settings">
+        <select id="voiceSelect" class="voice-select" title="Voz en Español"></select>
+        <select id="orderSelect" class="voice-select" onchange="setOrderMode(this.value)" title="Orden">
+          <option value="random">🔀 Orden Aleatorio</option>
+          <option value="sequential">🔤 Orden Alfabético</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- PRACTICE VIEW -->
+    <main class="flashcard" id="practiceView">
+      <div class="card-top-bar">
+        <span id="cardBadge" class="badge-level badge-facil">Nivel Fácil</span>
+        <span id="cardCounter">Palabra 1 de 150</span>
+        <button id="starBtn" class="star-btn" onclick="toggleStarCurrent()">☆ Guardar para repasar</button>
+      </div>
+
+      <!-- Audio Play Controls -->
+      <div class="play-zone">
+        <button class="btn-play-main" onclick="speakCurrentWord(0.92)">
+          🔊 Escuchar Palabra
+        </button>
+        <button class="btn-play-sub" onclick="speakCurrentWord(0.6)">
+          🐢 Lento
+        </button>
+        <button class="btn-play-sub" onclick="speakOfficialSpelling()" title="Escuchar cómo se deletrea en el concurso">
+          🔤 Escuchar Deletreo
+        </button>
+      </div>
+
+      <!-- Hints -->
+      <div class="hints-row">
+        <button class="hint-chip" onclick="showHint('length')">📏 ¿Cuántas letras?</button>
+        <button class="hint-chip" onclick="showHint('first')">🅰️ Primera letra</button>
+        <button class="hint-chip" onclick="showHint('traps')">🕵️ Pista ortográfica</button>
+      </div>
+      <div id="hintBox" class="hint-box"></div>
+
+      <!-- Letter Slots -->
+      <div id="wordSlots" class="word-slots"></div>
+
+      <!-- Mode Switcher: Voice vs Touch Keyboard -->
+      <div class="mode-switcher">
+        <button class="mode-tab active" id="modeAllBtn" onclick="setInputMode('both')">🎙️ Voz + ⌨️ Teclado</button>
+        <button class="mode-tab" id="modeVoiceBtn" onclick="setInputMode('voice')">🎙️ Solo Voz</button>
+        <button class="mode-tab" id="modeKbBtn" onclick="setInputMode('keyboard')">⌨️ Solo Teclado</button>
+      </div>
+
+      <!-- Voice Recording & Recognition Panel -->
+      <div class="voice-panel" id="voicePanel">
+        <div class="record-controls">
+          <button id="recordBtn" class="btn-record" onclick="toggleRecording()">
+            🎙️ Grabar mi Deletreo
+          </button>
+          <button class="btn-play-sub" onclick="clearAttempt()">
+            🗑️ Borrar Letras
+          </button>
+        </div>
+        <div class="voice-help">
+          <strong>¿Cómo deletrear por voz?</strong> Toca <em>Grabar mi Deletreo</em> y di las letras en español
+          (ej: <em>«be, a, eme, be, u con tilde»</em> o <em>«ve corta, i con acento, be larga, o, erre, a»</em>).
+          También graba tu voz para que puedas escucharte.
+        </div>
+        <div class="transcript-box">
+          <span>🗣️ <strong>Reconocido:</strong> <span id="liveTranscript" style="color:#64748b;">(Esperando grabación...)</span></span>
+        </div>
+        <div class="audio-playback-bar" id="audioPlaybackBar">
+          <button class="btn-play-sub" onclick="playRecordedAudio()">▶️ Escuchar mi grabación</button>
+          <button class="btn-play-sub" onclick="speakOfficialSpelling()">🔊 Comparar con deletreo oficial</button>
+          <audio id="recordedAudio" style="display:none;"></audio>
+        </div>
+      </div>
+
+      <!-- On-Screen Spanish Touch Keyboard -->
+      <div class="keyboard-panel" id="keyboardPanel">
+        <div class="kb-row">
+          <button class="kb-key accent-key" onclick="typeLetter('á')">á</button>
+          <button class="kb-key accent-key" onclick="typeLetter('é')">é</button>
+          <button class="kb-key accent-key" onclick="typeLetter('í')">í</button>
+          <button class="kb-key accent-key" onclick="typeLetter('ó')">ó</button>
+          <button class="kb-key accent-key" onclick="typeLetter('ú')">ú</button>
+          <button class="kb-key special-key" onclick="typeLetter('ü')">ü</button>
+          <button class="kb-key special-key" onclick="typeLetter('ñ')">ñ</button>
+          <button class="kb-key action-key" onclick="toggleAccentOnLast()" title="Poner o quitar tilde/diéresis a la última letra">✨ Tilde a última</button>
+        </div>
+        <div class="kb-row">
+          <button class="kb-key" onclick="typeLetter('q')">q</button>
+          <button class="kb-key" onclick="typeLetter('w')">w</button>
+          <button class="kb-key" onclick="typeLetter('e')">e</button>
+          <button class="kb-key" onclick="typeLetter('r')">r</button>
+          <button class="kb-key" onclick="typeLetter('t')">t</button>
+          <button class="kb-key" onclick="typeLetter('y')">y</button>
+          <button class="kb-key" onclick="typeLetter('u')">u</button>
+          <button class="kb-key" onclick="typeLetter('i')">i</button>
+          <button class="kb-key" onclick="typeLetter('o')">o</button>
+          <button class="kb-key" onclick="typeLetter('p')">p</button>
+        </div>
+        <div class="kb-row">
+          <button class="kb-key" onclick="typeLetter('a')">a</button>
+          <button class="kb-key" onclick="typeLetter('s')">s</button>
+          <button class="kb-key" onclick="typeLetter('d')">d</button>
+          <button class="kb-key" onclick="typeLetter('f')">f</button>
+          <button class="kb-key" onclick="typeLetter('g')">g</button>
+          <button class="kb-key" onclick="typeLetter('h')">h</button>
+          <button class="kb-key" onclick="typeLetter('j')">j</button>
+          <button class="kb-key" onclick="typeLetter('k')">k</button>
+          <button class="kb-key" onclick="typeLetter('l')">l</button>
+          <button class="kb-key special-key" onclick="typeLetter('ñ')">ñ</button>
+        </div>
+        <div class="kb-row">
+          <button class="kb-key" onclick="typeLetter('z')">z</button>
+          <button class="kb-key" onclick="typeLetter('x')">x</button>
+          <button class="kb-key" onclick="typeLetter('c')">c</button>
+          <button class="kb-key" onclick="typeLetter('v')">v</button>
+          <button class="kb-key" onclick="typeLetter('b')">b</button>
+          <button class="kb-key" onclick="typeLetter('n')">n</button>
+          <button class="kb-key" onclick="typeLetter('m')">m</button>
+          <button class="kb-key action-key" onclick="backspaceLetter()">⌫ Borrar</button>
+        </div>
+      </div>
+
+      <!-- Feedback Banner -->
+      <div id="feedbackCard" class="feedback-card">
+        <div id="feedbackTitle" class="feedback-title"></div>
+        <div id="answerWordDisplay" class="answer-word-display"></div>
+        <div id="phoneticScript" class="phonetic-script"></div>
+        <div class="self-grade-btns">
+          <button class="btn-play-sub" onclick="markSelfGrade(true)">✅ ¡La deletreé bien!</button>
+          <button class="btn-play-sub" onclick="markSelfGrade(false)">⭐ Guardar para practicar más</button>
+        </div>
+      </div>
+
+      <!-- Bottom Action Buttons -->
+      <div class="action-row">
+        <button class="btn-reveal" onclick="prevWord()">⬅️ Anterior</button>
+        <button class="btn-check" onclick="checkSpelling()">✔️ Comprobar Respuesta</button>
+        <button class="btn-reveal" onclick="revealWord()">👀 Mostrar Palabra</button>
+        <button class="btn-next" onclick="nextWord()">Siguiente ➡️</button>
+      </div>
+    </main>
+
+    <!-- DICTIONARY / ALL 650 WORDS VIEW -->
+    <section class="list-view" id="listView">
+      <div class="search-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Buscar entre las 650 palabras..." oninput="renderWordList()" />
+      </div>
+      <div style="font-size:13px; color:var(--muted);">
+        Toca cualquier palabra para escuchar su pronunciación o practicarla en la tarjeta.
+      </div>
+      <div id="wordGrid" class="word-grid"></div>
+    </section>
+  </div>
+
+  <script>
+    const WORDS_DATA = {"facil": ["acabar", "acacia", "airear", "ajeno", "aldea", "alegre", "anís", "ardid", "atento", "azahar", "bambú", "barniz", "barril", "berza", "besar", "boca", "boina", "bonzo", "boya", "bozal", "bretón", "buitre", "bulto", "canica", "carbón", "compás", "concha", "creer", "cuerda", "deber", "dorado", "erizo", "espía", "falúa", "fisura", "flaco", "forzar", "frágil", "ganar", "ganga", "gleba", "gloria", "gozoso", "grande", "guinda", "género", "habón", "hartar", "hurón", "hélice", "inglés", "ironía", "jarrón", "jauría", "jazmín", "jergón", "jirafa", "jubón", "jugar", "jácara", "laico", "latido", "laísmo", "libro", "léxico", "lícito", "mirada", "mucho", "mudez", "nombre", "náyade", "níquel", "oculto", "ojera", "olivar", "orilla", "orozuz", "oyamel", "padre", "pagar", "paloma", "pasión", "pastel", "peluca", "piñón", "poseer", "premio", "querer", "raglán", "ratón", "raíz", "rencor", "revés", "roedor", "rígido", "salida", "sandía", "saqueo", "sartén", "satén", "sermón", "sifón", "simple", "sonoro", "sódico", "tacatá", "tahúr", "tango", "tapete", "tardío", "timón", "titán", "tostón", "turco", "tácito", "típico", "túnel", "unción", "unir", "uréter", "usted", "utopía", "vaina", "varón", "verano", "verbal", "viento", "viruta", "visera", "visión", "víbora", "yate", "yegua", "yemení", "yoyó", "zafio", "zaguán", "zarina", "zarpa", "zueco", "zumbar", "zábila", "álbum", "ánodo", "égloga", "ñoño", "ópalo", "óxido", "único", "útil"], "medio": ["abdicar", "abrupto", "absorber", "abubilla", "acampar", "acantáceo", "acarrear", "acechar", "actitud", "acuerdo", "acérrimo", "aderezo", "adhesión", "agridulce", "alacrán", "alcancía", "alergia", "alguacil", "aliciente", "almohada", "altavoz", "alucinar", "amnesia", "ampolla", "anomalía", "aparato", "apelación", "apéndice", "apófisis", "arcilla", "armazón", "arquero", "arquetipo", "arreglar", "artesano", "artimaña", "artista", "artículo", "ascensión", "asonante", "atuendo", "atómico", "ausente", "autismo", "autónomo", "avícola", "ayatolá", "añoranza", "balbuceo", "bambalina", "bandazo", "barbarie", "basilisco", "batidora", "bautizado", "benévolo", "bicéfala", "bisabuelo", "bisiesto", "boicotear", "bolsillo", "boyante", "brevedad", "bronquio", "burguesía", "báscula", "cachorro", "carambola", "caramelo", "carnaval", "carnívoro", "carroza", "carúncula", "catamarán", "catatumba", "caucásico", "chiflón", "chigüín", "chiismo", "chorizo", "chorrear", "ciempiés", "cimbrar", "clerecía", "clonación", "coartada", "concreto", "conjugar", "convertir", "coquetear", "corregir", "cosechar", "crueldad", "cruzada", "cubículo", "cucaracha", "cuchara", "cultivar", "deductivo", "delicioso", "deshilar", "despejar", "destino", "dictador", "dinamizar", "dinámico", "director", "disculpa", "discusión", "distinto", "droguería", "ejecutivo", "ejemplo", "ejercitar", "embalaje", "empañado", "ensuciado", "entereza", "entrada", "entrenar", "escanciar", "escarcha", "escisión", "escolanía", "escrúpulo", "escuadrón", "escuela", "escuálido", "esdrújula", "esencia", "espalda", "estiércol", "estética", "etílico", "eufemismo", "exagerar", "exordio", "facsímile", "fanfarrón", "fiambre", "filigrana", "filmoteca", "flojera", "frívolo", "galáctico", "ganador", "geometría", "geranio", "glicérido", "glándula", "grafólogo", "guachimán", "gérmenes", "hebdómada", "hebilla", "hexágono", "hipótesis", "histérico", "hojaldre", "horchata", "hospedaje", "huracán", "impreciso", "inductivo", "inhalador", "inherente", "insepulto", "insoluble", "intervalo", "intrépido", "intuición", "inviable", "invidente", "inyección", "izquierdo", "jalapeño", "jilguero", "jolgorio", "lagartija", "laosiano", "lenguaje", "lengüeta", "locutorio", "lumbago", "machacón", "mandíbula", "manejable", "mausoleo", "mazorca", "mejorar", "mofarse", "mojigato", "monógamo", "mortero", "muletón", "musaraña", "necesario", "nevisca", "nimiedad", "nupcias", "náhuatl", "obcecado", "obertura", "octógono", "odontoide", "omnívoro", "oncólogo", "operable", "opinión", "orfandad", "orégano", "oxímoron", "pantomima", "paraíso", "parecido", "parihuela", "parásito", "parótida", "pasajero", "pectina", "percance", "pleonasmo", "político", "pregunta", "pretérito", "primavera", "primero", "probable", "problema", "pulcritud", "pulsador", "páncreas", "pánfilo", "párpado", "quiebro", "ralentí", "raviolis", "rebeldía", "redhibir", "regresar", "reservado", "respeto", "reunión", "rezumar", "riqueza", "rivalidad", "romántico", "rúbrica", "rústico", "sabandija", "salvaje", "samurái", "secesión", "secreto", "seudónimo", "silogismo", "siniestra", "sonrisa", "suceder", "sándalo", "sátrapa", "tarántula", "taxista", "tectónico", "telégrafo", "topónimo", "toquilla", "torpeza", "trampilla", "trasluz", "trigésimo", "triunfo", "tráfico", "tuétano", "tártaro", "tímpano", "ukelele", "ulmáceo", "umbilical", "ungüento", "unigénito", "vacilar", "vademécum", "validez", "venenoso", "ventana", "verídico", "vigilante", "vinoteca", "viruela", "vitriolo", "vozarrón", "xilófono", "yanomami", "zaherir", "zalamero", "zamarrear", "zarigüeya", "zoología", "ñoñería"], "avanzado": ["abastecimiento", "abecedario", "abigarrado", "accionista", "adolescente", "adverbialización", "agarrotado", "alcantarillado", "ambigüedad", "analgésico", "antigüedad", "aprovisionamiento", "archiduque", "arteriosclerosis", "asambleísta", "asociación", "barrabasada", "bizantinismo", "burocracia", "cabizcaído", "cacomiztle", "caligrafía", "característico", "carpetovetónico", "cascarrabias", "catedrático", "cenicienta", "centrípeto", "cicatrizar", "cigomático", "cleptómano", "coadyuvante", "comunicación", "conceptualizar", "constipado", "correctibilidad", "costumbrismo", "cuadringentésimo", "culpabilidad", "cumplimentar", "currículum", "dactiloscopia", "degenerativo", "demostración", "desencajado", "deshidratación", "deslizamiento", "destornillador", "dialéctico", "dubitativo", "efectividad", "electrocardiograma", "embravecer", "emigración", "empampirolado", "endecasílabo", "enladrillado", "escamotear", "esquizofrénico", "estereotipado", "estilográfica", "estudiante", "exacerbado", "excelencia", "excelsitud", "explayarse", "extranjero", "extraversión", "extrínseco", "ferroviario", "filantropía", "filarmónica", "filosófico", "fitopatología", "fotoluminiscencia", "fotosíntesis", "frecuencia", "gallináceo", "geosinclinal", "guacarnaco", "halterofilia", "hegemónico", "helenización", "heroicidad", "hidratante", "hiperventilar", "hipervitaminosis", "hipotenusa", "horcajadas", "huelguista", "ictiología", "ilustrativo", "impaciencia", "improvisación", "incognoscible", "inconveniente", "indiscutible", "ineluctable", "inexorable", "ininteligible", "inmigración", "inmobiliaria", "inmunología", "innovación", "inquietante", "inseminación", "insensibilización", "insonorizar", "institucionalización", "insurrección", "irritación", "jactancioso", "jaculatoria", "jitanjáfora", "juerguista", "jurisdicción", "jurisprudencia", "justificación", "labiérnago", "lacedemonio", "lacrimógeno", "larguirucho", "lematización", "libidinoso", "liechtensteiniano", "liquidación", "macarrónico", "malabarista", "maremágnum", "megalómano", "menospreciable", "metacrilato", "mitocondria", "monolingüe", "muestrario", "murciélago", "nauseabundo", "neoimpresionismo", "neologismo", "neumogástrico", "neuroembriología", "novelístico", "obstetricia", "occidentalizar", "octogenario", "oftalmólogo", "oligoelemento", "onomatopeya", "organización", "panhelenismo", "pantagruélico", "parnasianismo", "parsimonia", "patológico", "peristáltico", "permisividad", "piragüista", "pisciforme", "piscolabis", "pluscuamperfecto", "politécnico", "posmodernista", "preestablecido", "pronunciación", "psicomotricidad", "publicación", "putrefacción", "quinceañera", "quiropraxia", "raquitismo", "recibimiento", "repiqueteo", "resistencia", "reverberación", "rimbombante", "sacacorchos", "sanctasanctórum", "servidumbre", "somnoliento", "subsahariano", "tegucigalpense", "teotihuacano", "tiquismiquis", "tiranosaurio", "titularización", "transportar", "transversal", "trascendental", "triquiñuela", "triunvirato", "urbanístico", "usufructuario", "valoración", "vehemencia", "ventrílocuo", "verificación", "verosimilitud", "yuxtaposición", "zafarrancho", "zancadilla"]};
+
+    // Build flat master list with metadata
+    const ALL_WORDS = [];
+    for (const [lvl, arr] of Object.entries(WORDS_DATA)) {
+      arr.forEach((w, idx) => {
+        ALL_WORDS.push({
+          word: w,
+          level: lvl,
+          indexInLevel: idx + 1,
+          hasTildeOrSpecial: /[áéíóúüñ]/i.test(w),
+          hasTrap: /[hbvcszgjxky]/i.test(w)
+        });
+      });
+    }
+
+    // Persistent state in localStorage
+    let stats = JSON.parse(localStorage.getItem('spanishBeeStats_v1') || '{"streak":0,"correct":0,"reviewWords":[]}');
+    let reviewSet = new Set(stats.reviewWords || []);
+
+    let currentFilter = 'facil';
+    let orderMode = 'random';
+    let filteredDeck = [];
+    let currentIndex = 0;
+    let currentAttempt = '';
+    let isRevealed = false;
+
+    // Speech Synthesis setup
+    let voices = [];
+    let selectedVoice = null;
+
+    function loadVoices() {
+      voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      const select = document.getElementById('voiceSelect');
+      select.innerHTML = '';
+      const esVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
+      const listToUse = esVoices.length > 0 ? esVoices : voices;
+
+      // Prefer Paulina (es-MX), Mónica (es-ES), or any high-quality Spanish voice
+      let bestIdx = 0;
+      listToUse.forEach((v, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${v.name} (${v.lang})`;
+        select.appendChild(opt);
+        const n = v.name.toLowerCase();
+        if (n.includes('paulina') || n.includes('mónica') || n.includes('monica') || v.lang === 'es-MX') {
+          bestIdx = i;
+        }
+      });
+      if (listToUse.length > 0) {
+        select.value = bestIdx;
+        selectedVoice = listToUse[bestIdx];
+      }
+      select.onchange = () => {
+        selectedVoice = listToUse[Number(select.value)] || null;
+      };
+    }
+    if ('speechSynthesis' in window) {
+      loadVoices();
+      window.speechSynthesis.onvoiceschanged = loadVoices;
+    }
+
+    function speakText(text, rate = 0.9) {
+      if (!('speechSynthesis' in window)) {
+        alert('Tu navegador no soporta síntesis de voz.');
+        return;
+      }
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      if (selectedVoice) u.voice = selectedVoice;
+      u.lang = selectedVoice ? selectedVoice.lang : 'es-MX';
+      u.rate = rate;
+      u.pitch = 1.0;
+      window.speechSynthesis.speak(u);
+    }
+
+    function speakCurrentWord(rate = 0.92) {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      speakText(item.word, rate);
+    }
+
+    // Official Spanish letter names for spelling bee
+    const LETTER_NAMES = {
+      'a': 'a',
+      'á': 'a con tilde',
+      'b': 'be',
+      'c': 'ce',
+      'd': 'de',
+      'e': 'e',
+      'é': 'e con tilde',
+      'f': 'efe',
+      'g': 'ge',
+      'h': 'hache',
+      'i': 'i',
+      'í': 'i con tilde',
+      'j': 'jota',
+      'k': 'ka',
+      'l': 'ele',
+      'm': 'eme',
+      'n': 'ene',
+      'ñ': 'eñe',
+      'o': 'o',
+      'ó': 'o con tilde',
+      'p': 'pe',
+      'q': 'cu',
+      'r': 'ere',
+      's': 'ese',
+      't': 'te',
+      'u': 'u',
+      'ú': 'u con tilde',
+      'ü': 'u con diéresis',
+      'v': 'uve',
+      'w': 'doble u',
+      'x': 'equis',
+      'y': 'ye',
+      'z': 'zeta'
+    };
+
+    function getLetterSpokenBreakdown(word) {
+      return Array.from(word.toLowerCase()).map(ch => LETTER_NAMES[ch] || ch);
+    }
+
+    function speakOfficialSpelling() {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      const letters = getLetterSpokenBreakdown(item.word).join(', ');
+      const fullScript = `${item.word}. ${letters}. ${item.word}.`;
+      speakText(fullScript, 0.82);
+    }
+
+    // Deck & Filtering
+    function buildDeck() {
+      let base = ALL_WORDS.filter(item => {
+        if (currentFilter === 'facil') return item.level === 'facil';
+        if (currentFilter === 'medio') return item.level === 'medio';
+        if (currentFilter === 'avanzado') return item.level === 'avanzado';
+        if (currentFilter === 'tildes') return item.hasTildeOrSpecial;
+        if (currentFilter === 'trampas') return item.hasTrap;
+        if (currentFilter === 'review') return reviewSet.has(item.word);
+        return true;
+      });
+      if (base.length === 0 && currentFilter === 'review') {
+        alert('¡Aún no tienes palabras guardadas en "Repasar"! Puedes marcar palabras con la estrella ☆ o cuando falles una.');
+        currentFilter = 'facil';
+        document.querySelectorAll('.pill-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === 'facil'));
+        base = ALL_WORDS.filter(item => item.level === 'facil');
+      }
+      filteredDeck = [...base];
+      if (orderMode === 'random') {
+        for (let i = filteredDeck.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [filteredDeck[i], filteredDeck[j]] = [filteredDeck[j], filteredDeck[i]];
+        }
+      }
+      currentIndex = 0;
+      loadCard();
+      renderWordList();
+    }
+
+    function setFilter(f) {
+      currentFilter = f;
+      document.querySelectorAll('.pill-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.filter === f);
+      });
+      buildDeck();
+    }
+
+    function setOrderMode(mode) {
+      orderMode = mode;
+      buildDeck();
+    }
+
+    function getCurrentWordObj() {
+      return filteredDeck[currentIndex] || null;
+    }
+
+    function loadCard() {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      currentAttempt = '';
+      isRevealed = false;
+      document.getElementById('hintBox').style.display = 'none';
+      document.getElementById('feedbackCard').style.display = 'none';
+      document.getElementById('liveTranscript').textContent = '(Esperando grabación...)';
+      document.getElementById('audioPlaybackBar').style.display = 'none';
+
+      // Badge & Counter
+      const badge = document.getElementById('cardBadge');
+      badge.className = 'badge-level badge-' + item.level;
+      const lvlNames = { facil: 'Nivel Fácil (≤ 6 letras)', medio: 'Nivel Medio (7–9 letras)', avanzado: 'Nivel Avanzado (10+ letras)' };
+      badge.textContent = lvlNames[item.level];
+      document.getElementById('cardCounter').textContent = `Palabra ${currentIndex + 1} de ${filteredDeck.length}`;
+
+      updateStarUI();
+      renderSlots();
+    }
+
+    function updateStarUI() {
+      const item = getCurrentWordObj();
+      const btn = document.getElementById('starBtn');
+      if (item && reviewSet.has(item.word)) {
+        btn.className = 'star-btn starred';
+        btn.textContent = '★ En lista de repaso';
+      } else {
+        btn.className = 'star-btn';
+        btn.textContent = '☆ Guardar para repasar';
+      }
+      document.getElementById('statReview').textContent = reviewSet.size;
+      document.getElementById('pillReviewCount').textContent = reviewSet.size;
+      document.getElementById('statStreak').textContent = stats.streak || 0;
+      document.getElementById('statCorrect').textContent = stats.correct || 0;
+    }
+
+    function saveStats() {
+      stats.reviewWords = Array.from(reviewSet);
+      localStorage.setItem('spanishBeeStats_v1', JSON.stringify(stats));
+      updateStarUI();
+    }
+
+    function toggleStarCurrent() {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      if (reviewSet.has(item.word)) {
+        reviewSet.delete(item.word);
+      } else {
+        reviewSet.add(item.word);
+      }
+      saveStats();
+    }
+
+    function stripDiacritics(ch) {
+      return ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+
+    function renderSlots(gradeMode = false) {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      const container = document.getElementById('wordSlots');
+      container.innerHTML = '';
+      const target = item.word.toLowerCase();
+      const attempt = currentAttempt.toLowerCase();
+      const maxLen = Math.max(target.length, attempt.length);
+
+      for (let i = 0; i < maxLen; i++) {
+        const div = document.createElement('div');
+        div.className = 'slot';
+        const ch = attempt[i] || '';
+        div.textContent = ch;
+
+        if (!gradeMode && i === attempt.length && i < target.length) {
+          div.classList.add('active-cursor');
+        }
+        if (gradeMode) {
+          const tCh = target[i] || '';
+          if (ch === tCh && ch !== '') {
+            div.classList.add('correct');
+          } else if (ch && tCh && stripDiacritics(ch) === stripDiacritics(tCh) && tCh !== 'ñ' && ch !== 'ñ') {
+            div.classList.add('almost'); // right base letter, missing/wrong tilde or dieresis
+          } else {
+            div.classList.add('wrong');
+          }
+        }
+        container.appendChild(div);
+      }
+    }
+
+    // Touch Keyboard Handlers
+    function typeLetter(ch) {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      if (currentAttempt.length < item.word.length + 4) {
+        currentAttempt += ch;
+        renderSlots(false);
+      }
+    }
+
+    function backspaceLetter() {
+      if (currentAttempt.length > 0) {
+        currentAttempt = currentAttempt.slice(0, -1);
+        renderSlots(false);
+      }
+    }
+
+    function clearAttempt() {
+      currentAttempt = '';
+      document.getElementById('feedbackCard').style.display = 'none';
+      renderSlots(false);
+    }
+
+    function toggleAccentOnLast() {
+      if (!currentAttempt) return;
+      const last = currentAttempt.slice(-1);
+      const map = {
+        'a': 'á', 'á': 'a',
+        'e': 'é', 'é': 'e',
+        'i': 'í', 'í': 'i',
+        'o': 'ó', 'ó': 'o',
+        'u': 'ú', 'ú': 'ü', 'ü': 'u',
+        'n': 'ñ', 'ñ': 'n'
+      };
+      if (map[last]) {
+        currentAttempt = currentAttempt.slice(0, -1) + map[last];
+        renderSlots(false);
+      }
+    }
+
+    // Physical keyboard support (for iPad Magic Keyboard / Bluetooth Keyboard)
+    window.addEventListener('keydown', (e) => {
+      if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+      if (document.getElementById('practiceView').style.display === 'none') return;
+      if (e.key === 'Backspace') {
+        e.preventDefault();
+        backspaceLetter();
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        checkSpelling();
+      } else if (e.key === ' ') {
+        e.preventDefault();
+        speakCurrentWord(0.92);
+      } else if (e.key.length === 1 && /[a-záéíóúüñA-ZÁÉÍÓÚÜÑ]/.test(e.key)) {
+        typeLetter(e.key.toLowerCase());
+      }
+    });
+
+    // Hints
+    function showHint(type) {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      const box = document.getElementById('hintBox');
+      box.style.display = 'block';
+      const w = item.word;
+
+      if (type === 'length') {
+        box.textContent = `📏 Esta palabra tiene exactamente ${w.length} letras.`;
+      } else if (type === 'first') {
+        const first = w[0].toLowerCase();
+        box.textContent = `🅰️ Empieza con la letra «${first.toUpperCase()}» (${LETTER_NAMES[first] || first}).`;
+      } else if (type === 'traps') {
+        const notes = [];
+        if (/[áéíóú]/.test(w)) notes.push('lleva tilde (acento gráfico)');
+        else notes.push('NO lleva tilde');
+        if (w.includes('ü')) notes.push('lleva diéresis (ü)');
+        if (w.includes('ñ')) notes.push('contiene la letra Ñ');
+        if (w.includes('h')) notes.push('tiene H muda');
+        if (w.includes('b') || w.includes('v')) notes.push('contiene B / V');
+        if (/[csz]/.test(w)) notes.push('atención con C / S / Z');
+        if (/[gj]/.test(w)) notes.push('atención con G / J');
+        box.textContent = `🕵️ Pista: ${notes.join(' • ')}.`;
+      }
+    }
+
+    // Grading & Reveal
+    function checkSpelling() {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      const target = item.word.toLowerCase();
+      const attempt = currentAttempt.toLowerCase().trim();
+
+      if (!attempt) {
+        alert('Escribe o graba las letras primero, o toca "Mostrar Palabra" para ver la respuesta.');
+        return;
+      }
+
+      renderSlots(true);
+      const fb = document.getElementById('feedbackCard');
+      const title = document.getElementById('feedbackTitle');
+      const wordDisp = document.getElementById('answerWordDisplay');
+      const scriptDisp = document.getElementById('phoneticScript');
+
+      fb.style.display = 'flex';
+      wordDisp.textContent = item.word;
+      scriptDisp.textContent = 'Deletreo oficial: ' + getLetterSpokenBreakdown(item.word).join(' – ');
+
+      if (attempt === target) {
+        fb.className = 'feedback-card success';
+        title.textContent = '🎉 ¡Excelente! ¡Deletreo 100% Correcto!';
+        stats.streak = (stats.streak || 0) + 1;
+        stats.correct = (stats.correct || 0) + 1;
+        saveStats();
+      } else if (stripDiacritics(attempt) === stripDiacritics(target)) {
+        fb.className = 'feedback-card error';
+        title.textContent = `⚠️ ¡Muy cerca! Las letras están bien, pero revisa la tilde, diéresis o eñe. (Tu respuesta: ${attempt})`;
+        stats.streak = 0;
+        reviewSet.add(item.word);
+        saveStats();
+      } else {
+        fb.className = 'feedback-card error';
+        title.textContent = `❌ Revisa las letras marcadas en rojo/amarillo. (Tu respuesta: ${attempt})`;
+        stats.streak = 0;
+        reviewSet.add(item.word);
+        saveStats();
+      }
+    }
+
+    function revealWord() {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      currentAttempt = item.word;
+      renderSlots(true);
+      const fb = document.getElementById('feedbackCard');
+      const title = document.getElementById('feedbackTitle');
+      const wordDisp = document.getElementById('answerWordDisplay');
+      const scriptDisp = document.getElementById('phoneticScript');
+
+      fb.style.display = 'flex';
+      fb.className = 'feedback-card neutral';
+      title.textContent = '👀 Palabra Revelada';
+      wordDisp.textContent = item.word;
+      scriptDisp.textContent = 'Deletreo oficial: ' + getLetterSpokenBreakdown(item.word).join(' – ');
+    }
+
+    function markSelfGrade(correct) {
+      const item = getCurrentWordObj();
+      if (!item) return;
+      if (correct) {
+        stats.streak = (stats.streak || 0) + 1;
+        stats.correct = (stats.correct || 0) + 1;
+        saveStats();
+        nextWord();
+      } else {
+        stats.streak = 0;
+        reviewSet.add(item.word);
+        saveStats();
+        nextWord();
+      }
+    }
+
+    function nextWord() {
+      if (filteredDeck.length === 0) return;
+      currentIndex = (currentIndex + 1) % filteredDeck.length;
+      loadCard();
+      speakCurrentWord(0.92);
+    }
+
+    function prevWord() {
+      if (filteredDeck.length === 0) return;
+      currentIndex = (currentIndex - 1 + filteredDeck.length) % filteredDeck.length;
+      loadCard();
+      speakCurrentWord(0.92);
+    }
+
+    function setInputMode(mode) {
+      document.getElementById('modeAllBtn').classList.toggle('active', mode === 'both');
+      document.getElementById('modeVoiceBtn').classList.toggle('active', mode === 'voice');
+      document.getElementById('modeKbBtn').classList.toggle('active', mode === 'keyboard');
+      document.getElementById('voicePanel').style.display = (mode === 'both' || mode === 'voice') ? 'flex' : 'none';
+      document.getElementById('keyboardPanel').style.display = (mode === 'both' || mode === 'keyboard') ? 'flex' : 'none';
+    }
+
+    // =========================================================================
+    // SPANISH SPELLING BEE VOICE PARSER & AUDIO RECORDER
+    // =========================================================================
+    let isRecording = false;
+    let recognition = null;
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let recordedBlobUrl = null;
+
+    // Parses spoken Spanish letter names ("be, a, eme, be, u con tilde") into "bambú"
+    function parseSpanishSpokenSpelling(transcript, targetWord) {
+      let raw = transcript.toLowerCase()
+        .replace(/[.,;:\-_/!?¡¿"']/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (!raw) return '';
+
+      // Normalize multi-word Spanish letter names & modifiers first
+      let s = ' ' + raw + ' ';
+      const phraseReplacements = [
+        [' u con diéresis ', ' __u_dieresis__ '],
+        [' u con dieresis ', ' __u_dieresis__ '],
+        [' u con crema ', ' __u_dieresis__ '],
+        [' u con puntitos ', ' __u_dieresis__ '],
+        [' a con tilde ', ' __a_tilde__ '],
+        [' a con acento ', ' __a_tilde__ '],
+        [' e con tilde ', ' __e_tilde__ '],
+        [' e con acento ', ' __e_tilde__ '],
+        [' i con tilde ', ' __i_tilde__ '],
+        [' i con acento ', ' __i_tilde__ '],
+        [' o con tilde ', ' __o_tilde__ '],
+        [' o con acento ', ' __o_tilde__ '],
+        [' u con tilde ', ' __u_tilde__ '],
+        [' u con acento ', ' __u_tilde__ '],
+        [' be larga ', ' b '],
+        [' be grande ', ' b '],
+        [' be alta ', ' b '],
+        [' ve corta ', ' v '],
+        [' ve chica ', ' v '],
+        [' ve pequeña ', ' v '],
+        [' ve baja ', ' v '],
+        [' uve doble ', ' w '],
+        [' doble u ', ' w '],
+        [' doble ve ', ' w '],
+        [' doble uve ', ' w '],
+        [' doble ele ', ' ll '],
+        [' doble erre ', ' rr '],
+        [' doble ere ', ' rr '],
+        [' i griega ', ' y '],
+        [' con tilde ', ' __tilde__ '],
+        [' con acento ', ' __tilde__ '],
+        [' acentuada ', ' __tilde__ '],
+        [' con diéresis ', ' __dieresis__ '],
+        [' con dieresis ', ' __dieresis__ ']
+      ];
+      for (const [pat, rep] of phraseReplacements) {
+        s = s.split(pat).join(rep);
+      }
+
+      const tokenMap = {
+        '__a_tilde__': 'á',
+        '__e_tilde__': 'é',
+        '__i_tilde__': 'í',
+        '__o_tilde__': 'ó',
+        '__u_tilde__': 'ú',
+        '__u_dieresis__': 'ü',
+        'a': 'a', 'ah': 'a', 'ha': 'a',
+        'á': 'á',
+        'b': 'b', 'be': 'b',
+        'v': 'v', 've': 'v', 'uve': 'v',
+        'c': 'c', 'ce': 'c', 'se': 'c',
+        'ch': 'ch', 'che': 'ch',
+        'd': 'd', 'de': 'd',
+        'e': 'e', 'eh': 'e', 'he': 'e',
+        'é': 'é',
+        'f': 'f', 'efe': 'f',
+        'g': 'g', 'ge': 'g', 'je': 'g',
+        'h': 'h', 'hache': 'h', 'ache': 'h',
+        'i': 'i', 'í': 'í',
+        'j': 'j', 'jota': 'j',
+        'k': 'k', 'ka': 'k', 'ca': 'k',
+        'l': 'l', 'ele': 'l',
+        'll': 'll', 'elle': 'll',
+        'm': 'm', 'eme': 'm',
+        'n': 'n', 'ene': 'n',
+        'ñ': 'ñ', 'eñe': 'ñ',
+        'o': 'o', 'oh': 'o', 'ó': 'ó',
+        'p': 'p', 'pe': 'p',
+        'q': 'q', 'cu': 'q', 'qu': 'q',
+        'r': 'r', 'ere': 'r', 'erre': 'r',
+        'rr': 'rr',
+        's': 's', 'ese': 's',
+        't': 't', 'te': 't',
+        'u': 'u', 'uh': 'u', 'ú': 'ú', 'ü': 'ü',
+        'w': 'w', 'dobleu': 'w',
+        'x': 'x', 'equis': 'x',
+        'y': 'y', 'ye': 'y',
+        'z': 'z', 'zeta': 'z', 'seta': 'z', 'ceta': 'z'
+      };
+
+      const parts = s.trim().split(/\s+/);
+      let result = [];
+
+      for (const tok of parts) {
+        if (!tok) continue;
+        if (tok === '__tilde__' || tok === 'tilde' || tok === 'acento') {
+          if (result.length > 0) {
+            const last = result[result.length - 1];
+            const accentMap = { 'a': 'á', 'e': 'é', 'i': 'í', 'o': 'ó', 'u': 'ú' };
+            if (accentMap[last]) result[result.length - 1] = accentMap[last];
+          }
+          continue;
+        }
+        if (tok === '__dieresis__' || tok === 'diéresis' || tok === 'dieresis') {
+          if (result.length > 0 && (result[result.length - 1] === 'u' || result[result.length - 1] === 'ú')) {
+            result[result.length - 1] = 'ü';
+          }
+          continue;
+        }
+        if (tokenMap[tok]) {
+          result.push(tokenMap[tok]);
+        } else if (tok.length === 1 && /[a-záéíóúüñ]/.test(tok)) {
+          result.push(tok);
+        } else if (targetWord && tok === targetWord.toLowerCase() && parts.length === 1) {
+          return tok;
+        }
+      }
+
+      return result.join('');
+    }
+
+    async function toggleRecording() {
+      const btn = document.getElementById('recordBtn');
+      if (isRecording) {
+        stopRecording();
+        return;
+      }
+
+      isRecording = true;
+      btn.classList.add('recording');
+      btn.innerHTML = '⏹️ Detener Grabación';
+      document.getElementById('liveTranscript').textContent = 'Escuchando tu deletreo...';
+
+      // 1. Start audio recording (MediaRecorder) so she can hear her voice back
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) audioChunks.push(e.data);
+        };
+        mediaRecorder.onstop = () => {
+          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/mp4' });
+          if (recordedBlobUrl) URL.revokeObjectURL(recordedBlobUrl);
+          recordedBlobUrl = URL.createObjectURL(blob);
+          const audioEl = document.getElementById('recordedAudio');
+          audioEl.src = recordedBlobUrl;
+          document.getElementById('audioPlaybackBar').style.display = 'flex';
+          stream.getTracks().forEach(t => t.stop());
+        };
+        mediaRecorder.start();
+      } catch (err) {
+        console.warn('MediaRecorder no disponible o permiso denegado:', err);
+      }
+
+      // 2. Start SpeechRecognition (Web Speech API)
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (SpeechRec) {
+        recognition = new SpeechRec();
+        recognition.lang = 'es-MX';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (event) => {
+          let fullText = '';
+          for (let i = 0; i < event.results.length; i++) {
+            fullText += event.results[i][0].transcript + ' ';
+          }
+          fullText = fullText.trim();
+          const item = getCurrentWordObj();
+          const parsed = parseSpanishSpokenSpelling(fullText, item ? item.word : '');
+          document.getElementById('liveTranscript').textContent = `"${fullText}" → ${parsed || '...'}`;
+          if (parsed) {
+            currentAttempt = parsed;
+            renderSlots(false);
+          }
+        };
+
+        recognition.onerror = (e) => {
+          console.warn('SpeechRecognition notice:', e.error);
+        };
+
+        recognition.onend = () => {
+          if (isRecording) {
+            stopRecording();
+          }
+        };
+
+        try {
+          recognition.start();
+        } catch (e) {
+          console.warn(e);
+        }
+      } else {
+        document.getElementById('liveTranscript').textContent = 'Grabando audio de voz (usa el botón de reproducir al terminar)...';
+      }
+    }
+
+    function stopRecording() {
+      isRecording = false;
+      const btn = document.getElementById('recordBtn');
+      btn.classList.remove('recording');
+      btn.innerHTML = '🎙️ Grabar mi Deletreo';
+
+      if (recognition) {
+        try { recognition.stop(); } catch (e) {}
+        recognition = null;
+      }
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        try { mediaRecorder.stop(); } catch (e) {}
+      }
+    }
+
+    function playRecordedAudio() {
+      const audioEl = document.getElementById('recordedAudio');
+      if (audioEl && audioEl.src) {
+        audioEl.play();
+      }
+    }
+
+    // =========================================================================
+    // WORD LIST / DICTIONARY TAB
+    // =========================================================================
+    function switchMainTab(tab) {
+      document.getElementById('tabPracticeBtn').classList.toggle('active', tab === 'practice');
+      document.getElementById('tabListBtn').classList.toggle('active', tab === 'list');
+      document.getElementById('practiceView').style.display = tab === 'practice' ? 'flex' : 'none';
+      document.getElementById('listView').style.display = tab === 'list' ? 'flex' : 'none';
+      if (tab === 'list') renderWordList();
+    }
+
+    function renderWordList() {
+      const grid = document.getElementById('wordGrid');
+      if (!grid) return;
+      const q = (document.getElementById('searchInput').value || '').toLowerCase().trim();
+      const source = currentFilter === 'all' ? ALL_WORDS : filteredDeck;
+      const matches = source.filter(item => !q || item.word.toLowerCase().includes(q) || stripDiacritics(item.word.toLowerCase()).includes(stripDiacritics(q)));
+
+      grid.innerHTML = '';
+      matches.forEach((item) => {
+        const div = document.createElement('div');
+        div.className = 'word-item';
+        const lvlBadgeClass = 'badge-' + item.level;
+        const lvlShort = item.level === 'facil' ? 'Fácil' : (item.level === 'medio' ? 'Medio' : 'Avanz.');
+        div.innerHTML = `
+          <span class="word-item-text">${item.word}</span>
+          <span class="word-item-lvl ${lvlBadgeClass}">${lvlShort}</span>
+        `;
+        div.onclick = () => {
+          speakText(item.word, 0.9);
+          const idxInDeck = filteredDeck.findIndex(x => x.word === item.word);
+          if (idxInDeck !== -1) {
+            currentIndex = idxInDeck;
+            loadCard();
+          }
+        };
+        grid.appendChild(div);
+      });
+    }
+
+    // Initialize App
+    buildDeck();
+  </script>
+</body>
+</html>
