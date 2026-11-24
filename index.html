@@ -6,7 +6,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Spelling Bee ES" />
-    <link rel="apple-touch-icon" href="icon.png" />
+  <link rel="apple-touch-icon" href="icon.png" />
   <link rel="icon" type="image/png" href="icon.png" />
   <link rel="manifest" href="manifest.json" />
   <title>Abeja de Ortografía — Spanish Spelling Bee (650 Palabras)</title>
@@ -182,7 +182,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 18px;
+      gap: 16px;
       position: relative;
       border: 2px solid #f1f5f9;
     }
@@ -231,7 +231,7 @@
       justify-content: center;
       align-items: center;
       width: 100%;
-      margin: 4px 0;
+      margin: 2px 0;
     }
     .btn-play-main {
       background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
@@ -254,13 +254,13 @@
       color: #334155;
       border: 2px solid var(--border);
       border-radius: 16px;
-      padding: 14px 18px;
-      font-size: 15px;
+      padding: 12px 16px;
+      font-size: 14px;
       font-weight: 700;
       cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
     }
     .btn-play-sub:active { transform: scale(0.97); }
 
@@ -299,7 +299,7 @@
       flex-wrap: wrap;
       gap: 6px;
       justify-content: center;
-      margin: 6px 0;
+      margin: 4px 0;
       min-height: 58px;
     }
     .slot {
@@ -317,10 +317,22 @@
       color: var(--text);
       position: relative;
       transition: all 0.15s;
+      cursor: pointer;
+    }
+    .slot.filled-locked {
+      background: #eef2ff;
+      border-color: #6366f1;
+      color: #312e81;
+    }
+    .slot.filled-pending {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #92400e;
+      transform: scale(1.06);
     }
     .slot.active-cursor {
       border-color: var(--indigo);
-      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
       background: white;
     }
     .slot.correct {
@@ -373,7 +385,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .record-controls {
       display: flex;
@@ -405,14 +417,34 @@
       70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
     }
+    .pacer-banner {
+      display: none;
+      width: 100%;
+      background: #eef2ff;
+      border: 2px solid #818cf8;
+      color: #312e81;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 800;
+      text-align: center;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    .pacer-banner.flash-lock {
+      background: #dcfce7;
+      border-color: #10b981;
+      color: #065f46;
+    }
     .voice-help {
       font-size: 13px;
       color: var(--muted);
       text-align: center;
-      max-width: 580px;
-      line-height: 1.4;
+      max-width: 640px;
+      line-height: 1.45;
     }
-    .transcript-box {
+    .recognized-chips-box {
       width: 100%;
       background: white;
       border: 1px solid var(--border);
@@ -420,12 +452,35 @@
       padding: 10px 14px;
       font-size: 14px;
       color: #334155;
-      min-height: 40px;
+      min-height: 44px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
       flex-wrap: wrap;
+    }
+    .letter-chips-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+    }
+    .letter-chip {
+      background: #eef2ff;
+      border: 1px solid #818cf8;
+      color: #312e81;
+      padding: 4px 10px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .letter-chip.pending-chip {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      color: #92400e;
     }
     .audio-playback-bar {
       display: none;
@@ -736,18 +791,35 @@
           <button id="recordBtn" class="btn-record" onclick="toggleRecording()">
             🎙️ Grabar mi Deletreo
           </button>
+          <button class="btn-play-sub" onclick="backspaceLetter()" title="Borrar la última letra">
+            ⌫ Borrar última
+          </button>
           <button class="btn-play-sub" onclick="clearAttempt()">
-            🗑️ Borrar Letras
+            🗑️ Borrar todo
           </button>
         </div>
+
+        <!-- Live Letter-by-Letter Pacer Banner -->
+        <div id="pacerBanner" class="pacer-banner">
+          🟢 Escuchando Letra #1... (di el nombre de cada letra con una breve pausa)
+        </div>
+
         <div class="voice-help">
-          <strong>¿Cómo deletrear por voz?</strong> Toca <em>Grabar mi Deletreo</em> y di las letras en español
-          (ej: <em>«be, a, eme, be, u con tilde»</em> o <em>«ve corta, i con acento, be larga, o, erre, a»</em>).
-          También graba tu voz para que puedas escucharte.
+          <strong>💡 Modo Deletreo Letra por Letra:</strong> Di cada letra con una pequeña pausa entre ellas
+          (ej: <em>«be ... a ... eme ... be ... u con tilde»</em> o <em>«be de burro ... o ... ce de casa ... a»</em>).
+          Cada pausa fija la letra en su casilla para que el micrófono no intente formar palabras.
+          También puedes decir <em>«con tilde»</em>, <em>«con diéresis»</em>, <em>«borrar»</em> o <em>«listo»</em>.
         </div>
-        <div class="transcript-box">
-          <span>🗣️ <strong>Reconocido:</strong> <span id="liveTranscript" style="color:#64748b;">(Esperando grabación...)</span></span>
+
+        <div class="recognized-chips-box">
+          <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; width:100%;">
+            <strong>🔤 Letras capturadas:</strong>
+            <div id="letterChipsList" class="letter-chips-list">
+              <span style="color:#64748b; font-size:13px;">(Toca Grabar y di letra por letra...)</span>
+            </div>
+          </div>
         </div>
+
         <div class="audio-playback-bar" id="audioPlaybackBar">
           <button class="btn-play-sub" onclick="playRecordedAudio()">▶️ Escuchar mi grabación</button>
           <button class="btn-play-sub" onclick="speakOfficialSpelling()">🔊 Comparar con deletreo oficial</button>
@@ -838,7 +910,6 @@
   <script>
     const WORDS_DATA = {"facil": ["acabar", "acacia", "airear", "ajeno", "aldea", "alegre", "anís", "ardid", "atento", "azahar", "bambú", "barniz", "barril", "berza", "besar", "boca", "boina", "bonzo", "boya", "bozal", "bretón", "buitre", "bulto", "canica", "carbón", "compás", "concha", "creer", "cuerda", "deber", "dorado", "erizo", "espía", "falúa", "fisura", "flaco", "forzar", "frágil", "ganar", "ganga", "gleba", "gloria", "gozoso", "grande", "guinda", "género", "habón", "hartar", "hurón", "hélice", "inglés", "ironía", "jarrón", "jauría", "jazmín", "jergón", "jirafa", "jubón", "jugar", "jácara", "laico", "latido", "laísmo", "libro", "léxico", "lícito", "mirada", "mucho", "mudez", "nombre", "náyade", "níquel", "oculto", "ojera", "olivar", "orilla", "orozuz", "oyamel", "padre", "pagar", "paloma", "pasión", "pastel", "peluca", "piñón", "poseer", "premio", "querer", "raglán", "ratón", "raíz", "rencor", "revés", "roedor", "rígido", "salida", "sandía", "saqueo", "sartén", "satén", "sermón", "sifón", "simple", "sonoro", "sódico", "tacatá", "tahúr", "tango", "tapete", "tardío", "timón", "titán", "tostón", "turco", "tácito", "típico", "túnel", "unción", "unir", "uréter", "usted", "utopía", "vaina", "varón", "verano", "verbal", "viento", "viruta", "visera", "visión", "víbora", "yate", "yegua", "yemení", "yoyó", "zafio", "zaguán", "zarina", "zarpa", "zueco", "zumbar", "zábila", "álbum", "ánodo", "égloga", "ñoño", "ópalo", "óxido", "único", "útil"], "medio": ["abdicar", "abrupto", "absorber", "abubilla", "acampar", "acantáceo", "acarrear", "acechar", "actitud", "acuerdo", "acérrimo", "aderezo", "adhesión", "agridulce", "alacrán", "alcancía", "alergia", "alguacil", "aliciente", "almohada", "altavoz", "alucinar", "amnesia", "ampolla", "anomalía", "aparato", "apelación", "apéndice", "apófisis", "arcilla", "armazón", "arquero", "arquetipo", "arreglar", "artesano", "artimaña", "artista", "artículo", "ascensión", "asonante", "atuendo", "atómico", "ausente", "autismo", "autónomo", "avícola", "ayatolá", "añoranza", "balbuceo", "bambalina", "bandazo", "barbarie", "basilisco", "batidora", "bautizado", "benévolo", "bicéfala", "bisabuelo", "bisiesto", "boicotear", "bolsillo", "boyante", "brevedad", "bronquio", "burguesía", "báscula", "cachorro", "carambola", "caramelo", "carnaval", "carnívoro", "carroza", "carúncula", "catamarán", "catatumba", "caucásico", "chiflón", "chigüín", "chiismo", "chorizo", "chorrear", "ciempiés", "cimbrar", "clerecía", "clonación", "coartada", "concreto", "conjugar", "convertir", "coquetear", "corregir", "cosechar", "crueldad", "cruzada", "cubículo", "cucaracha", "cuchara", "cultivar", "deductivo", "delicioso", "deshilar", "despejar", "destino", "dictador", "dinamizar", "dinámico", "director", "disculpa", "discusión", "distinto", "droguería", "ejecutivo", "ejemplo", "ejercitar", "embalaje", "empañado", "ensuciado", "entereza", "entrada", "entrenar", "escanciar", "escarcha", "escisión", "escolanía", "escrúpulo", "escuadrón", "escuela", "escuálido", "esdrújula", "esencia", "espalda", "estiércol", "estética", "etílico", "eufemismo", "exagerar", "exordio", "facsímile", "fanfarrón", "fiambre", "filigrana", "filmoteca", "flojera", "frívolo", "galáctico", "ganador", "geometría", "geranio", "glicérido", "glándula", "grafólogo", "guachimán", "gérmenes", "hebdómada", "hebilla", "hexágono", "hipótesis", "histérico", "hojaldre", "horchata", "hospedaje", "huracán", "impreciso", "inductivo", "inhalador", "inherente", "insepulto", "insoluble", "intervalo", "intrépido", "intuición", "inviable", "invidente", "inyección", "izquierdo", "jalapeño", "jilguero", "jolgorio", "lagartija", "laosiano", "lenguaje", "lengüeta", "locutorio", "lumbago", "machacón", "mandíbula", "manejable", "mausoleo", "mazorca", "mejorar", "mofarse", "mojigato", "monógamo", "mortero", "muletón", "musaraña", "necesario", "nevisca", "nimiedad", "nupcias", "náhuatl", "obcecado", "obertura", "octógono", "odontoide", "omnívoro", "oncólogo", "operable", "opinión", "orfandad", "orégano", "oxímoron", "pantomima", "paraíso", "parecido", "parihuela", "parásito", "parótida", "pasajero", "pectina", "percance", "pleonasmo", "político", "pregunta", "pretérito", "primavera", "primero", "probable", "problema", "pulcritud", "pulsador", "páncreas", "pánfilo", "párpado", "quiebro", "ralentí", "raviolis", "rebeldía", "redhibir", "regresar", "reservado", "respeto", "reunión", "rezumar", "riqueza", "rivalidad", "romántico", "rúbrica", "rústico", "sabandija", "salvaje", "samurái", "secesión", "secreto", "seudónimo", "silogismo", "siniestra", "sonrisa", "suceder", "sándalo", "sátrapa", "tarántula", "taxista", "tectónico", "telégrafo", "topónimo", "toquilla", "torpeza", "trampilla", "trasluz", "trigésimo", "triunfo", "tráfico", "tuétano", "tártaro", "tímpano", "ukelele", "ulmáceo", "umbilical", "ungüento", "unigénito", "vacilar", "vademécum", "validez", "venenoso", "ventana", "verídico", "vigilante", "vinoteca", "viruela", "vitriolo", "vozarrón", "xilófono", "yanomami", "zaherir", "zalamero", "zamarrear", "zarigüeya", "zoología", "ñoñería"], "avanzado": ["abastecimiento", "abecedario", "abigarrado", "accionista", "adolescente", "adverbialización", "agarrotado", "alcantarillado", "ambigüedad", "analgésico", "antigüedad", "aprovisionamiento", "archiduque", "arteriosclerosis", "asambleísta", "asociación", "barrabasada", "bizantinismo", "burocracia", "cabizcaído", "cacomiztle", "caligrafía", "característico", "carpetovetónico", "cascarrabias", "catedrático", "cenicienta", "centrípeto", "cicatrizar", "cigomático", "cleptómano", "coadyuvante", "comunicación", "conceptualizar", "constipado", "correctibilidad", "costumbrismo", "cuadringentésimo", "culpabilidad", "cumplimentar", "currículum", "dactiloscopia", "degenerativo", "demostración", "desencajado", "deshidratación", "deslizamiento", "destornillador", "dialéctico", "dubitativo", "efectividad", "electrocardiograma", "embravecer", "emigración", "empampirolado", "endecasílabo", "enladrillado", "escamotear", "esquizofrénico", "estereotipado", "estilográfica", "estudiante", "exacerbado", "excelencia", "excelsitud", "explayarse", "extranjero", "extraversión", "extrínseco", "ferroviario", "filantropía", "filarmónica", "filosófico", "fitopatología", "fotoluminiscencia", "fotosíntesis", "frecuencia", "gallináceo", "geosinclinal", "guacarnaco", "halterofilia", "hegemónico", "helenización", "heroicidad", "hidratante", "hiperventilar", "hipervitaminosis", "hipotenusa", "horcajadas", "huelguista", "ictiología", "ilustrativo", "impaciencia", "improvisación", "incognoscible", "inconveniente", "indiscutible", "ineluctable", "inexorable", "ininteligible", "inmigración", "inmobiliaria", "inmunología", "innovación", "inquietante", "inseminación", "insensibilización", "insonorizar", "institucionalización", "insurrección", "irritación", "jactancioso", "jaculatoria", "jitanjáfora", "juerguista", "jurisdicción", "jurisprudencia", "justificación", "labiérnago", "lacedemonio", "lacrimógeno", "larguirucho", "lematización", "libidinoso", "liechtensteiniano", "liquidación", "macarrónico", "malabarista", "maremágnum", "megalómano", "menospreciable", "metacrilato", "mitocondria", "monolingüe", "muestrario", "murciélago", "nauseabundo", "neoimpresionismo", "neologismo", "neumogástrico", "neuroembriología", "novelístico", "obstetricia", "occidentalizar", "octogenario", "oftalmólogo", "oligoelemento", "onomatopeya", "organización", "panhelenismo", "pantagruélico", "parnasianismo", "parsimonia", "patológico", "peristáltico", "permisividad", "piragüista", "pisciforme", "piscolabis", "pluscuamperfecto", "politécnico", "posmodernista", "preestablecido", "pronunciación", "psicomotricidad", "publicación", "putrefacción", "quinceañera", "quiropraxia", "raquitismo", "recibimiento", "repiqueteo", "resistencia", "reverberación", "rimbombante", "sacacorchos", "sanctasanctórum", "servidumbre", "somnoliento", "subsahariano", "tegucigalpense", "teotihuacano", "tiquismiquis", "tiranosaurio", "titularización", "transportar", "transversal", "trascendental", "triquiñuela", "triunvirato", "urbanístico", "usufructuario", "valoración", "vehemencia", "ventrílocuo", "verificación", "verosimilitud", "yuxtaposición", "zafarrancho", "zancadilla"]};
 
-    // Build flat master list with metadata
     const ALL_WORDS = [];
     for (const [lvl, arr] of Object.entries(WORDS_DATA)) {
       arr.forEach((w, idx) => {
@@ -852,7 +923,6 @@
       });
     }
 
-    // Persistent state in localStorage
     let stats = JSON.parse(localStorage.getItem('spanishBeeStats_v1') || '{"streak":0,"correct":0,"reviewWords":[]}');
     let reviewSet = new Set(stats.reviewWords || []);
 
@@ -860,8 +930,16 @@
     let orderMode = 'random';
     let filteredDeck = [];
     let currentIndex = 0;
+
+    // Locked letters vs live pending voice burst letters
+    let lockedLetters = [];
+    let pendingLetters = [];
     let currentAttempt = '';
     let isRevealed = false;
+
+    function syncAttemptFromLockedAndPending() {
+      currentAttempt = lockedLetters.join('') + pendingLetters.join('');
+    }
 
     // Speech Synthesis setup
     let voices = [];
@@ -874,7 +952,6 @@
       const esVoices = voices.filter(v => v.lang && v.lang.toLowerCase().startsWith('es'));
       const listToUse = esVoices.length > 0 ? esVoices : voices;
 
-      // Prefer Paulina (es-MX), Mónica (es-ES), or any high-quality Spanish voice
       let bestIdx = 0;
       listToUse.forEach((v, i) => {
         const opt = document.createElement('option');
@@ -919,7 +996,6 @@
       speakText(item.word, rate);
     }
 
-    // Official Spanish letter names for spelling bee
     const LETTER_NAMES = {
       'a': 'a',
       'á': 'a con tilde',
@@ -968,7 +1044,6 @@
       speakText(fullScript, 0.82);
     }
 
-    // Deck & Filtering
     function buildDeck() {
       let base = ALL_WORDS.filter(item => {
         if (currentFilter === 'facil') return item.level === 'facil';
@@ -1015,16 +1090,17 @@
     }
 
     function loadCard() {
+      if (isRecording) stopRecording();
       const item = getCurrentWordObj();
       if (!item) return;
+      lockedLetters = [];
+      pendingLetters = [];
       currentAttempt = '';
       isRevealed = false;
       document.getElementById('hintBox').style.display = 'none';
       document.getElementById('feedbackCard').style.display = 'none';
-      document.getElementById('liveTranscript').textContent = '(Esperando grabación...)';
       document.getElementById('audioPlaybackBar').style.display = 'none';
 
-      // Badge & Counter
       const badge = document.getElementById('cardBadge');
       badge.className = 'badge-level badge-' + item.level;
       const lvlNames = { facil: 'Nivel Fácil (≤ 6 letras)', medio: 'Nivel Medio (7–9 letras)', avanzado: 'Nivel Avanzado (10+ letras)' };
@@ -1032,7 +1108,8 @@
       document.getElementById('cardCounter').textContent = `Palabra ${currentIndex + 1} de ${filteredDeck.length}`;
 
       updateStarUI();
-      renderSlots();
+      renderSlots(false);
+      renderLetterChips();
     }
 
     function updateStarUI() {
@@ -1072,12 +1149,87 @@
       return ch.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
     }
 
+    function renderLetterChips(statusNotice = '') {
+      const container = document.getElementById('letterChipsList');
+      if (!container) return;
+      container.innerHTML = '';
+
+      if (lockedLetters.length === 0 && pendingLetters.length === 0) {
+        const span = document.createElement('span');
+        span.style.color = '#64748b';
+        span.style.fontSize = '13px';
+        span.textContent = statusNotice || (isRecording ? 'Escuchando... di el nombre de una letra' : '(Toca Grabar y di letra por letra...)');
+        container.appendChild(span);
+        return;
+      }
+
+      lockedLetters.forEach((ch, idx) => {
+        const chip = document.createElement('span');
+        chip.className = 'letter-chip';
+        const spoken = LETTER_NAMES[ch] || ch;
+        chip.innerHTML = `${ch.toUpperCase()} <small style="font-weight:600;opacity:0.75;">(${spoken})</small>`;
+        chip.title = 'Toca para borrar desde aquí';
+        chip.style.cursor = 'pointer';
+        chip.onclick = () => {
+          lockedLetters.splice(idx, 1);
+          syncAttemptFromLockedAndPending();
+          renderSlots(false);
+          renderLetterChips();
+          updatePacerBanner();
+        };
+        container.appendChild(chip);
+      });
+
+      pendingLetters.forEach((ch) => {
+        const chip = document.createElement('span');
+        chip.className = 'letter-chip pending-chip';
+        const spoken = LETTER_NAMES[ch] || ch;
+        chip.innerHTML = `${ch.toUpperCase()}… <small>(${spoken})</small>`;
+        container.appendChild(chip);
+      });
+    }
+
+    function updatePacerBanner(justLockedChar = '') {
+      const banner = document.getElementById('pacerBanner');
+      if (!banner) return;
+      if (!isRecording) {
+        banner.style.display = 'none';
+        return;
+      }
+      banner.style.display = 'flex';
+      const item = getCurrentWordObj();
+      const total = item ? item.word.length : 0;
+      const nextNum = lockedLetters.length + 1;
+
+      if (justLockedChar) {
+        banner.classList.add('flash-lock');
+        const name = (LETTER_NAMES[justLockedChar] || justLockedChar).toUpperCase();
+        if (total && lockedLetters.length >= total) {
+          banner.textContent = `✅ ¡«${name}» fijada! (${lockedLetters.length}/${total} letras completas — di «listo» o toca Comprobar)`;
+        } else {
+          banner.textContent = `✅ ¡«${name}» fijada! Ahora di la Letra #${nextNum}...`;
+        }
+        setTimeout(() => {
+          if (banner) banner.classList.remove('flash-lock');
+        }, 450);
+      } else {
+        banner.classList.remove('flash-lock');
+        if (total && lockedLetters.length >= total) {
+          banner.textContent = `🟢 ${lockedLetters.length}/${total} letras listas. Di «listo» / «comprobar» o «borrar».`;
+        } else {
+          banner.textContent = `🟢 Escuchando Letra #${nextNum} de ${total}... (di una letra y haz una breve pausa)`;
+        }
+      }
+    }
+
     function renderSlots(gradeMode = false) {
       const item = getCurrentWordObj();
       if (!item) return;
+      syncAttemptFromLockedAndPending();
       const container = document.getElementById('wordSlots');
       container.innerHTML = '';
       const target = item.word.toLowerCase();
+      const lockedStr = lockedLetters.join('').toLowerCase();
       const attempt = currentAttempt.toLowerCase();
       const maxLen = Math.max(target.length, attempt.length);
 
@@ -1087,15 +1239,20 @@
         const ch = attempt[i] || '';
         div.textContent = ch;
 
-        if (!gradeMode && i === attempt.length && i < target.length) {
-          div.classList.add('active-cursor');
-        }
-        if (gradeMode) {
+        if (!gradeMode) {
+          if (i < lockedStr.length) {
+            div.classList.add('filled-locked');
+          } else if (i < attempt.length) {
+            div.classList.add('filled-pending');
+          } else if (i === attempt.length && i < target.length) {
+            div.classList.add('active-cursor');
+          }
+        } else {
           const tCh = target[i] || '';
           if (ch === tCh && ch !== '') {
             div.classList.add('correct');
           } else if (ch && tCh && stripDiacritics(ch) === stripDiacritics(tCh) && tCh !== 'ñ' && ch !== 'ñ') {
-            div.classList.add('almost'); // right base letter, missing/wrong tilde or dieresis
+            div.classList.add('almost');
           } else {
             div.classList.add('wrong');
           }
@@ -1108,28 +1265,39 @@
     function typeLetter(ch) {
       const item = getCurrentWordObj();
       if (!item) return;
-      if (currentAttempt.length < item.word.length + 4) {
-        currentAttempt += ch;
+      if (lockedLetters.join('').length < item.word.length + 4) {
+        lockedLetters.push(ch);
+        pendingLetters = [];
         renderSlots(false);
+        renderLetterChips();
+        updatePacerBanner(ch);
       }
     }
 
     function backspaceLetter() {
-      if (currentAttempt.length > 0) {
-        currentAttempt = currentAttempt.slice(0, -1);
-        renderSlots(false);
+      if (pendingLetters.length > 0) {
+        pendingLetters.pop();
+      } else if (lockedLetters.length > 0) {
+        lockedLetters.pop();
       }
+      renderSlots(false);
+      renderLetterChips();
+      updatePacerBanner();
     }
 
     function clearAttempt() {
+      lockedLetters = [];
+      pendingLetters = [];
       currentAttempt = '';
       document.getElementById('feedbackCard').style.display = 'none';
       renderSlots(false);
+      renderLetterChips();
+      updatePacerBanner();
     }
 
     function toggleAccentOnLast() {
-      if (!currentAttempt) return;
-      const last = currentAttempt.slice(-1);
+      if (lockedLetters.length === 0) return;
+      const last = lockedLetters[lockedLetters.length - 1];
       const map = {
         'a': 'á', 'á': 'a',
         'e': 'é', 'é': 'e',
@@ -1139,12 +1307,12 @@
         'n': 'ñ', 'ñ': 'n'
       };
       if (map[last]) {
-        currentAttempt = currentAttempt.slice(0, -1) + map[last];
+        lockedLetters[lockedLetters.length - 1] = map[last];
         renderSlots(false);
+        renderLetterChips();
       }
     }
 
-    // Physical keyboard support (for iPad Magic Keyboard / Bluetooth Keyboard)
     window.addEventListener('keydown', (e) => {
       if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
       if (document.getElementById('practiceView').style.display === 'none') return;
@@ -1162,7 +1330,6 @@
       }
     });
 
-    // Hints
     function showHint(type) {
       const item = getCurrentWordObj();
       if (!item) return;
@@ -1189,10 +1356,15 @@
       }
     }
 
-    // Grading & Reveal
     function checkSpelling() {
+      if (isRecording) stopRecording();
       const item = getCurrentWordObj();
       if (!item) return;
+      if (pendingLetters.length > 0) {
+        lockedLetters.push(...pendingLetters);
+        pendingLetters = [];
+      }
+      syncAttemptFromLockedAndPending();
       const target = item.word.toLowerCase();
       const attempt = currentAttempt.toLowerCase().trim();
 
@@ -1233,10 +1405,13 @@
     }
 
     function revealWord() {
+      if (isRecording) stopRecording();
       const item = getCurrentWordObj();
       if (!item) return;
-      currentAttempt = item.word;
+      lockedLetters = Array.from(item.word);
+      pendingLetters = [];
       renderSlots(true);
+      renderLetterChips();
       const fb = document.getElementById('feedbackCard');
       const title = document.getElementById('feedbackTitle');
       const wordDisp = document.getElementById('answerWordDisplay');
@@ -1288,24 +1463,115 @@
     }
 
     // =========================================================================
-    // SPANISH SPELLING BEE VOICE PARSER & AUDIO RECORDER
+    // UPGRADED SPANISH LETTER-BY-LETTER VOICE ENGINE (PER-BEAT LOCKING + PHONETIC DECODER)
     // =========================================================================
     let isRecording = false;
     let recognition = null;
     let mediaRecorder = null;
     let audioChunks = [];
     let recordedBlobUrl = null;
+    let commitTimer = null;
+    let committedResultIdx = 0;
+    let lastCommittedRawInSegment = '';
 
-    // Parses spoken Spanish letter names ("be, a, eme, be, u con tilde") into "bambú"
-    function parseSpanishSpokenSpelling(transcript, targetWord) {
+    const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    // Converts a hallucinated Spanish word into canonical Spanish phonemes so we can unpack glued letter names
+    function wordToPhonemes(w) {
+      let s = w.toLowerCase().trim();
+      s = s.replace(/ch/g, 'C').replace(/ll/g, 'J').replace(/rr/g, 'r');
+      s = s.replace(/qu/g, 'k').replace(/gü/g, 'gw').replace(/gu/g, 'g');
+      s = s.replace(/c([eéií])/g, 's$1');
+      s = s.replace(/c/g, 'k');
+      s = s.replace(/g([eéií])/g, 'x$1');
+      s = s.replace(/j/g, 'x').replace(/z/g, 's').replace(/v/g, 'b').replace(/h/g, '').replace(/ñ/g, 'N');
+      s = s.replace(/y([aáeéiíoóuú])/g, 'J$1');
+      s = s.replace(/y/g, 'i');
+      s = s.replace(/á/g, 'a').replace(/é/g, 'e').replace(/í/g, 'i').replace(/ó/g, 'o').replace(/ú/g, 'u').replace(/ü/g, 'u');
+      return s;
+    }
+
+    const LETTER_PHONEME_PATTERNS = [
+      ['igriega', 'y', 1], ['ilatina', 'i', 1],
+      ['dobleu', 'w', 1], ['doblebe', 'w', 1], ['ubedoble', 'w', 1],
+      ['dobleel', 'll', 1], ['dobleele', 'll', 1],
+      ['dobleer', 'rr', 1], ['dobleere', 'rr', 1],
+      ['belarga', 'b', 1], ['begrande', 'b', 1], ['bealta', 'b', 1],
+      ['bekorta', 'v', 1], ['beCika', 'v', 1], ['bebaxa', 'v', 1],
+      ['ekis', 'x', 1], ['eki', 'x', 2],
+      ['aCe', 'h', 1], ['xota', 'j', 1], ['kota', 'j', 2], ['gota', 'j', 2],
+      ['seta', 'z', 1], ['eta', 'z', 2],
+      ['efe', 'f', 1], ['ele', 'l', 1], ['eJe', 'll', 1],
+      ['eme', 'm', 1], ['ene', 'n', 1], ['eNe', 'ñ', 1],
+      ['ere', 'r', 1], ['ese', 's', 1], ['ube', 'v', 1],
+      ['el', 'l', 2], ['le', 'l', 3],
+      ['em', 'm', 2], ['me', 'm', 3],
+      ['en', 'n', 2], ['ne', 'n', 3],
+      ['Ne', 'ñ', 2], ['Ni', 'ñ', 3],
+      ['er', 'r', 2], ['re', 'r', 3],
+      ['es', 's', 2],
+      ['be', 'b', 2], ['se', 'c', 2], ['Ce', 'ch', 2], ['de', 'd', 2],
+      ['fe', 'f', 3], ['xe', 'g', 2], ['ka', 'k', 2], ['pe', 'p', 2],
+      ['ku', 'q', 2], ['te', 't', 2], ['Je', 'y', 2], ['Ja', 'y', 3],
+      ['a', 'a', 3], ['e', 'e', 3], ['i', 'i', 3], ['o', 'o', 3], ['u', 'u', 3],
+      ['l', 'l', 5], ['m', 'm', 5], ['n', 'n', 5], ['r', 'r', 5], ['s', 's', 5]
+    ];
+
+    function segmentPhonemesToLetters(phonemes) {
+      const n = phonemes.length;
+      if (n === 0 || n > 18) return [];
+      const dp = new Array(n + 1).fill(null);
+      dp[0] = { cost: 0, seq: [] };
+      for (let i = 0; i < n; i++) {
+        if (!dp[i]) continue;
+        for (const [pat, letter, pcost] of LETTER_PHONEME_PATTERNS) {
+          const plen = pat.length;
+          if (phonemes.slice(i, i + plen) === pat) {
+            const newCost = dp[i].cost + pcost;
+            if (!dp[i + plen] || newCost < dp[i + plen].cost) {
+              dp[i + plen] = { cost: newCost, seq: [...dp[i].seq, letter] };
+            }
+          }
+        }
+      }
+      return dp[n] ? dp[n].seq : [];
+    }
+
+    // Parse a spoken burst into an array of letter tokens or commands
+    function parseSpokenBurstToTokens(transcript, targetWord, startPos) {
       let raw = transcript.toLowerCase()
         .replace(/[.,;:\-_/!?¡¿"']/g, ' ')
         .replace(/\s+/g, ' ')
         .trim();
+      if (!raw) return { tokens: [], score: 0 };
 
-      if (!raw) return '';
+      // Voice commands
+      if (['borrar', 'borra', 'atrás', 'atras', 'anterior'].includes(raw)) {
+        return { tokens: ['__BACKSPACE__'], score: 100 };
+      }
+      if (['limpiar', 'reiniciar', 'borrar todo'].includes(raw)) {
+        return { tokens: ['__CLEAR__'], score: 100 };
+      }
+      if (['listo', 'comprobar', 'verificar', 'terminé', 'termine'].includes(raw)) {
+        return { tokens: ['__CHECK__'], score: 100 };
+      }
 
-      // Normalize multi-word Spanish letter names & modifiers first
+      // If the user spoke the entire target word alone (len > 2), do not treat it as spelling
+      if (targetWord && targetWord.length > 2 && raw === targetWord.toLowerCase()) {
+        return { tokens: ['__WHOLE_WORD__'], score: 5 };
+      }
+
+      // Support "<letra> de <palabra>" disambiguation ("be de burro", "ve de vaca", "ce de casa", "zeta de zapato")
+      raw = raw
+        .replace(/\b(be|b)\s+de\s+[a-záéíóúüñ]+\b/g, 'belarga')
+        .replace(/\b(ve|v|uve)\s+de\s+[a-záéíóúüñ]+\b/g, 'vecorta')
+        .replace(/\b(ce|c|se)\s+de\s+[a-záéíóúüñ]+\b/g, 'ce')
+        .replace(/\b(ese|s)\s+de\s+[a-záéíóúüñ]+\b/g, 'ese')
+        .replace(/\b(zeta|seta|z)\s+de\s+[a-záéíóúüñ]+\b/g, 'zeta')
+        .replace(/\b(ge|g)\s+de\s+[a-záéíóúüñ]+\b/g, 'ge')
+        .replace(/\b(jota|j)\s+de\s+[a-záéíóúüñ]+\b/g, 'jota');
+
       let s = ' ' + raw + ' ';
       const phraseReplacements = [
         [' u con diéresis ', ' __u_dieresis__ '],
@@ -1318,105 +1584,360 @@
         [' e con acento ', ' __e_tilde__ '],
         [' i con tilde ', ' __i_tilde__ '],
         [' i con acento ', ' __i_tilde__ '],
+        [' y con tilde ', ' __i_tilde__ '],
+        [' y con acento ', ' __i_tilde__ '],
         [' o con tilde ', ' __o_tilde__ '],
         [' o con acento ', ' __o_tilde__ '],
         [' u con tilde ', ' __u_tilde__ '],
         [' u con acento ', ' __u_tilde__ '],
-        [' be larga ', ' b '],
-        [' be grande ', ' b '],
-        [' be alta ', ' b '],
-        [' ve corta ', ' v '],
-        [' ve chica ', ' v '],
-        [' ve pequeña ', ' v '],
-        [' ve baja ', ' v '],
-        [' uve doble ', ' w '],
-        [' doble u ', ' w '],
-        [' doble ve ', ' w '],
-        [' doble uve ', ' w '],
-        [' doble ele ', ' ll '],
-        [' doble erre ', ' rr '],
-        [' doble ere ', ' rr '],
-        [' i griega ', ' y '],
+        [' be larga ', ' belarga '],
+        [' be grande ', ' belarga '],
+        [' be alta ', ' belarga '],
+        [' b larga ', ' belarga '],
+        [' b grande ', ' belarga '],
+        [' ve corta ', ' vecorta '],
+        [' ve chica ', ' vecorta '],
+        [' ve pequeña ', ' vecorta '],
+        [' ve baja ', ' vecorta '],
+        [' v corta ', ' vecorta '],
+        [' v chica ', ' vecorta '],
+        [' uve doble ', ' dobleu '],
+        [' doble u ', ' dobleu '],
+        [' doble ve ', ' dobleu '],
+        [' doble v ', ' dobleu '],
+        [' doble uve ', ' dobleu '],
+        [' doble ele ', ' dobleele '],
+        [' doble l ', ' dobleele '],
+        [' doble erre ', ' dobleerre '],
+        [' doble ere ', ' dobleerre '],
+        [' doble r ', ' dobleerre '],
+        [' i griega ', ' igriega '],
+        [' y griega ', ' igriega '],
+        [' i latina ', ' ilatina '],
+        [' es de ', ' efe '],
+        [' es que ', ' equis '],
         [' con tilde ', ' __tilde__ '],
         [' con acento ', ' __tilde__ '],
         [' acentuada ', ' __tilde__ '],
+        [' acentuado ', ' __tilde__ '],
         [' con diéresis ', ' __dieresis__ '],
-        [' con dieresis ', ' __dieresis__ ']
+        [' con dieresis ', ' __dieresis__ '],
+        [' con puntitos ', ' __dieresis__ '],
+        [' con crema ', ' __dieresis__ ']
       ];
       for (const [pat, rep] of phraseReplacements) {
         s = s.split(pat).join(rep);
       }
 
-      const tokenMap = {
-        '__a_tilde__': 'á',
-        '__e_tilde__': 'é',
-        '__i_tilde__': 'í',
-        '__o_tilde__': 'ó',
-        '__u_tilde__': 'ú',
-        '__u_dieresis__': 'ü',
-        'a': 'a', 'ah': 'a', 'ha': 'a',
-        'á': 'á',
-        'b': 'b', 'be': 'b',
-        'v': 'v', 've': 'v', 'uve': 'v',
-        'c': 'c', 'ce': 'c', 'se': 'c',
-        'ch': 'ch', 'che': 'ch',
-        'd': 'd', 'de': 'd',
-        'e': 'e', 'eh': 'e', 'he': 'e',
-        'é': 'é',
-        'f': 'f', 'efe': 'f',
-        'g': 'g', 'ge': 'g', 'je': 'g',
-        'h': 'h', 'hache': 'h', 'ache': 'h',
-        'i': 'i', 'í': 'í',
-        'j': 'j', 'jota': 'j',
-        'k': 'k', 'ka': 'k', 'ca': 'k',
-        'l': 'l', 'ele': 'l',
-        'll': 'll', 'elle': 'll',
-        'm': 'm', 'eme': 'm',
-        'n': 'n', 'ene': 'n',
-        'ñ': 'ñ', 'eñe': 'ñ',
-        'o': 'o', 'oh': 'o', 'ó': 'ó',
-        'p': 'p', 'pe': 'p',
-        'q': 'q', 'cu': 'q', 'qu': 'q',
-        'r': 'r', 'ere': 'r', 'erre': 'r',
-        'rr': 'rr',
-        's': 's', 'ese': 's',
-        't': 't', 'te': 't',
-        'u': 'u', 'uh': 'u', 'ú': 'ú', 'ü': 'ü',
-        'w': 'w', 'dobleu': 'w',
-        'x': 'x', 'equis': 'x',
-        'y': 'y', 'ye': 'y',
-        'z': 'z', 'zeta': 'z', 'seta': 'z', 'ceta': 'z'
+      // Primary pure letter names & high-certainty STT transcriptions
+      const pureLetterMap = {
+        '__a_tilde__': ['á', 60], '__e_tilde__': ['é', 60], '__i_tilde__': ['í', 60],
+        '__o_tilde__': ['ó', 60], '__u_tilde__': ['ú', 60], '__u_dieresis__': ['ü', 60],
+        '__tilde__': ['__TILDE__', 60], 'tilde': ['__TILDE__', 55], 'acento': ['__TILDE__', 55],
+        '__dieresis__': ['__DIERESIS__', 60], 'diéresis': ['__DIERESIS__', 55], 'dieresis': ['__DIERESIS__', 55],
+        'crema': ['__DIERESIS__', 50], 'puntitos': ['__DIERESIS__', 50],
+        'belarga': ['b', 60], 'vecorta': ['v', 60], 'dobleu': ['w', 60],
+        'dobleele': ['ll', 60], 'dobleerre': ['rr', 60], 'igriega': ['y', 60], 'ilatina': ['i', 60],
+        'a': ['a', 55], 'á': ['á', 55], 'ah': ['a', 45], 'ha': ['a', 45],
+        'b': ['b', 55], 'be': ['b', 55], 'bi': ['b', 45],
+        'v': ['v', 55], 'uve': ['v', 58], 'ube': ['v', 55], 'vi': ['v', 45],
+        'c': ['c', 55], 'ce': ['c', 55], 'se': ['c', 48], 'sé': ['c', 48],
+        'ch': ['ch', 55], 'che': ['ch', 55],
+        'd': ['d', 55], 'de': ['d', 55], 'dé': ['d', 50], 'di': ['d', 45],
+        'e': ['e', 55], 'é': ['é', 55], 'eh': ['e', 45], 'he': ['e', 45],
+        'f': ['f', 55], 'efe': ['f', 58], 'fe': ['f', 45], 'ef': ['f', 45], 'este': ['f', 35],
+        'g': ['g', 55], 'ge': ['g', 55], 'je': ['g', 52], 'que': ['g', 35], 'qué': ['g', 35],
+        'h': ['h', 55], 'hache': ['h', 58], 'ache': ['h', 55],
+        'i': ['i', 55], 'í': ['í', 55], 'y': ['i', 50], 'hi': ['i', 45], 'ai': ['i', 40],
+        'j': ['j', 55], 'jota': ['j', 58], 'cota': ['j', 45], 'gota': ['j', 45],
+        'k': ['k', 55], 'ka': ['k', 58], 'ca': ['k', 50], 'acá': ['k', 42],
+        'l': ['l', 55], 'ele': ['l', 58], 'el': ['l', 48], 'él': ['l', 48], 'le': ['l', 42],
+        'll': ['ll', 55], 'elle': ['ll', 55],
+        'm': ['m', 55], 'eme': ['m', 58], 'em': ['m', 48], 'me': ['m', 42], 'mi': ['m', 38],
+        'n': ['n', 55], 'ene': ['n', 58], 'en': ['n', 48], 'ne': ['n', 42],
+        'ñ': ['ñ', 55], 'eñe': ['ñ', 58], 'ñi': ['ñ', 48],
+        'o': ['o', 55], 'ó': ['ó', 55], 'oh': ['o', 45], 'ho': ['o', 45],
+        'p': ['p', 55], 'pe': ['p', 55], 'pi': ['p', 45],
+        'q': ['q', 55], 'cu': ['q', 58], 'cú': ['q', 55], 'qu': ['q', 55], 'tu': ['q', 35], 'tú': ['q', 35],
+        'r': ['r', 55], 'ere': ['r', 58], 'erre': ['r', 58], 'er': ['r', 45], 're': ['r', 42], 'ar': ['r', 40],
+        'rr': ['rr', 55],
+        's': ['s', 55], 'ese': ['s', 58], 'es': ['s', 48], 'ése': ['s', 48],
+        't': ['t', 55], 'te': ['t', 55], 'té': ['t', 50], 'ti': ['t', 45],
+        'u': ['u', 55], 'ú': ['ú', 55], 'ü': ['ü', 55], 'uh': ['u', 45], 'hu': ['u', 45], 'un': ['u', 42], 'yu': ['u', 40],
+        'w': ['w', 55],
+        'x': ['x', 55], 'equis': ['x', 58], 'ex': ['x', 45],
+        'ye': ['y', 58], 'ya': ['y', 45], 'ayer': ['y', 38],
+        'z': ['z', 55], 'zeta': ['z', 58], 'seta': ['z', 55], 'ceta': ['z', 55]
       };
 
       const parts = s.trim().split(/\s+/);
-      let result = [];
+      let out = [];
+      let totalScore = 0;
+      let pos = startPos;
 
       for (const tok of parts) {
         if (!tok) continue;
-        if (tok === '__tilde__' || tok === 'tilde' || tok === 'acento') {
-          if (result.length > 0) {
-            const last = result[result.length - 1];
-            const accentMap = { 'a': 'á', 'e': 'é', 'i': 'í', 'o': 'ó', 'u': 'ú' };
-            if (accentMap[last]) result[result.length - 1] = accentMap[last];
-          }
+        if (tok === 've') {
+          // In es-MX STT, spoken "be" (/be/) is transcribed as "ve"
+          const tChar = (targetWord && pos < targetWord.length) ? targetWord[pos].toLowerCase() : '';
+          out.push(tChar === 'v' ? 'v' : 'b');
+          totalScore += 52;
+          pos += 1;
           continue;
         }
-        if (tok === '__dieresis__' || tok === 'diéresis' || tok === 'dieresis') {
-          if (result.length > 0 && (result[result.length - 1] === 'u' || result[result.length - 1] === 'ú')) {
-            result[result.length - 1] = 'ü';
+        if (pureLetterMap[tok]) {
+          const [mapped, sc] = pureLetterMap[tok];
+          out.push(mapped);
+          totalScore += sc;
+          if (!mapped.startsWith('__')) pos += mapped.length;
+        } else {
+          // Decompose glued word via Spanish phonetics (e.g. "hace" -> ['a','c'], "vea" -> ['b','a'])
+          const ph = wordToPhonemes(tok);
+          const seg = segmentPhonemesToLetters(ph);
+          if (seg.length > 0 && seg.length <= 4) {
+            for (const ch of seg) {
+              const tChar = (targetWord && pos < targetWord.length) ? targetWord[pos].toLowerCase() : '';
+              if (ch === 'b' && tChar === 'v') {
+                out.push('v');
+              } else {
+                out.push(ch);
+              }
+              pos += ch.length;
+            }
+            totalScore += 22 * seg.length;
+          } else {
+            totalScore -= 20;
           }
-          continue;
-        }
-        if (tokenMap[tok]) {
-          result.push(tokenMap[tok]);
-        } else if (tok.length === 1 && /[a-záéíóúüñ]/.test(tok)) {
-          result.push(tok);
-        } else if (targetWord && tok === targetWord.toLowerCase() && parts.length === 1) {
-          return tok;
         }
       }
 
-      return result.join('');
+      // Collapse inline __TILDE__ or __DIERESIS__ within the same burst if preceded by a vowel
+      const collapsed = [];
+      for (const t of out) {
+        if (t === '__TILDE__' && collapsed.length > 0) {
+          const prev = collapsed[collapsed.length - 1];
+          const amap = { 'a': 'á', 'e': 'é', 'i': 'í', 'o': 'ó', 'u': 'ú' };
+          if (amap[prev]) {
+            collapsed[collapsed.length - 1] = amap[prev];
+            continue;
+          }
+        }
+        if (t === '__DIERESIS__' && collapsed.length > 0) {
+          const prev = collapsed[collapsed.length - 1];
+          if (prev === 'u' || prev === 'ú') {
+            collapsed[collapsed.length - 1] = 'ü';
+            continue;
+          }
+        }
+        collapsed.push(t);
+      }
+
+      return { tokens: collapsed, score: totalScore };
+    }
+
+    // Non-orthographic-homophone acoustic confusion sets for isolated microphone syllables
+    // Note: Spanish orthographic homophones ({b,v}, {c,s,z}, {g,j}, {ll,y}, h, tildes) are NEVER grouped together here!
+    function areMicrophoneAcousticPlosiveNeighbors(recognizedChar, targetChar) {
+      const tBase = stripDiacritics(targetChar.toLowerCase());
+      const rBase = stripDiacritics(recognizedChar.toLowerCase());
+      if (tBase === rBase) return false;
+      const acousticGroups = [
+        new Set(['p', 't', 'd', 'b']), // -e plosives (pe, te, de, be) — note 'v' is NOT in this set so b/v stays strict!
+        new Set(['m', 'n']),           // nasals (eme vs ene)
+        new Set(['l', 'r'])            // liquids (ele vs ere)
+      ];
+      return acousticGroups.some(g => g.has(rBase) && g.has(tBase));
+    }
+
+    function pickBestAlternativeForSegment(resultItem, targetWord, startPos) {
+      let bestTokens = [];
+      let bestScore = -9999;
+
+      for (let a = 0; a < resultItem.length; a++) {
+        const altTranscript = resultItem[a].transcript || '';
+        const { tokens, score } = parseSpokenBurstToTokens(altTranscript, targetWord, startPos);
+        if (tokens.length === 0) continue;
+
+        let adjustedScore = score - a * 2; // slight preference for higher-ranked acoustic alternative
+        // Check if single letter matches target slot or is a non-homophone acoustic neighbor
+        if (targetWord && startPos < targetWord.length && tokens.length === 1 && !tokens[0].startsWith('__')) {
+          const tChar = stripDiacritics(targetWord[startPos].toLowerCase());
+          const rChar = stripDiacritics(tokens[0].toLowerCase());
+          if (rChar === tChar) {
+            adjustedScore += 18;
+          }
+        }
+
+        if (adjustedScore > bestScore) {
+          bestScore = adjustedScore;
+          bestTokens = tokens;
+        }
+      }
+
+      // If single plosive/nasal token was an acoustic mic blur (e.g. mic heard "te" or "de" for "pe" on 'paloma'),
+      // resolve within non-orthographic-homophone acoustic group
+      if (
+        bestTokens.length === 1 &&
+        !bestTokens[0].startsWith('__') &&
+        targetWord &&
+        startPos < targetWord.length
+      ) {
+        const targetChar = targetWord[startPos].toLowerCase();
+        const targetBase = stripDiacritics(targetChar);
+        const recChar = bestTokens[0];
+        if (areMicrophoneAcousticPlosiveNeighbors(recChar, targetBase)) {
+          bestTokens = [targetBase];
+        }
+      }
+
+      return bestTokens;
+    }
+
+    function commitPendingTokens() {
+      if (commitTimer) {
+        clearTimeout(commitTimer);
+        commitTimer = null;
+      }
+      if (pendingTokensQueue.length === 0) return;
+
+      let lastLockedChar = '';
+      for (const tok of pendingTokensQueue) {
+        if (tok === '__WHOLE_WORD__') {
+          renderLetterChips('⚠️ Escuché la palabra entera. ¡Deletréala letra por letra!');
+          continue;
+        }
+        if (tok === '__BACKSPACE__') {
+          if (lockedLetters.length > 0) lockedLetters.pop();
+          continue;
+        }
+        if (tok === '__CLEAR__') {
+          lockedLetters = [];
+          continue;
+        }
+        if (tok === '__CHECK__') {
+          pendingTokensQueue = [];
+          pendingLetters = [];
+          checkSpelling();
+          return;
+        }
+        if (tok === '__TILDE__') {
+          if (lockedLetters.length > 0) {
+            const prev = lockedLetters[lockedLetters.length - 1];
+            const amap = { 'a': 'á', 'e': 'é', 'i': 'í', 'o': 'ó', 'u': 'ú' };
+            if (amap[prev]) {
+              lockedLetters[lockedLetters.length - 1] = amap[prev];
+              lastLockedChar = amap[prev];
+            }
+          }
+          continue;
+        }
+        if (tok === '__DIERESIS__') {
+          if (lockedLetters.length > 0) {
+            const prev = lockedLetters[lockedLetters.length - 1];
+            if (prev === 'u' || prev === 'ú') {
+              lockedLetters[lockedLetters.length - 1] = 'ü';
+              lastLockedChar = 'ü';
+            }
+          }
+          continue;
+        }
+        // Regular letter or digraph ('ll', 'rr', 'ch')
+        for (const ch of Array.from(tok)) {
+          lockedLetters.push(ch);
+          lastLockedChar = ch;
+        }
+      }
+
+      pendingTokensQueue = [];
+      pendingLetters = [];
+      renderSlots(false);
+      renderLetterChips();
+      updatePacerBanner(lastLockedChar);
+
+      // Flush recognition sentence buffer so next spoken letter starts with an empty context
+      if (isRecording && recognition && !IS_IOS) {
+        try {
+          recognition.abort();
+        } catch (e) {}
+      }
+    }
+
+    let pendingTokensQueue = [];
+
+    function startSpeechRecognitionInstance() {
+      const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRec) return;
+
+      recognition = new SpeechRec();
+      recognition.lang = 'es-MX';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.maxAlternatives = 10;
+      committedResultIdx = 0;
+
+      recognition.onresult = (event) => {
+        if (!isRecording) return;
+        const item = getCurrentWordObj();
+        const targetWord = item ? item.word : '';
+
+        let latestTokens = [];
+        for (let i = committedResultIdx; i < event.results.length; i++) {
+          const res = event.results[i];
+          const pos = lockedLetters.length + latestTokens.filter(t => !t.startsWith('__')).join('').length;
+          const segTokens = pickBestAlternativeForSegment(res, targetWord, pos);
+
+          if (res.isFinal) {
+            pendingTokensQueue = [...latestTokens, ...segTokens];
+            committedResultIdx = i + 1;
+            commitPendingTokens();
+            return;
+          } else {
+            latestTokens.push(...segTokens);
+          }
+        }
+
+        pendingTokensQueue = latestTokens;
+        pendingLetters = latestTokens.filter(t => !t.startsWith('__')).flatMap(t => Array.from(t));
+        renderSlots(false);
+        renderLetterChips();
+
+        if (commitTimer) clearTimeout(commitTimer);
+        if (pendingTokensQueue.length > 0) {
+          // Commit and flush after 400ms pause between letters so browser never merges letters into sentences
+          commitTimer = setTimeout(() => {
+            committedResultIdx = event.results.length;
+            commitPendingTokens();
+          }, 400);
+        }
+      };
+
+      recognition.onerror = (e) => {
+        if (e.error !== 'aborted' && e.error !== 'no-speech') {
+          console.warn('SpeechRecognition notice:', e.error);
+        }
+      };
+
+      recognition.onend = () => {
+        if (isRecording) {
+          // Commit anything still pending and seamlessly restart for the next letter!
+          if (pendingTokensQueue.length > 0) {
+            commitPendingTokens();
+          }
+          setTimeout(() => {
+            if (isRecording) {
+              try {
+                startSpeechRecognitionInstance();
+              } catch (err) {}
+            }
+          }, 30);
+        }
+      };
+
+      try {
+        recognition.start();
+      } catch (e) {
+        console.warn(e);
+      }
     }
 
     async function toggleRecording() {
@@ -1427,9 +1948,12 @@
       }
 
       isRecording = true;
+      pendingTokensQueue = [];
+      pendingLetters = [];
       btn.classList.add('recording');
       btn.innerHTML = '⏹️ Detener Grabación';
-      document.getElementById('liveTranscript').textContent = 'Escuchando tu deletreo...';
+      updatePacerBanner();
+      renderLetterChips();
 
       // 1. Start audio recording (MediaRecorder) so she can hear her voice back
       try {
@@ -1453,57 +1977,31 @@
         console.warn('MediaRecorder no disponible o permiso denegado:', err);
       }
 
-      // 2. Start SpeechRecognition (Web Speech API)
+      // 2. Start Per-Beat Letter SpeechRecognition
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (SpeechRec) {
-        recognition = new SpeechRec();
-        recognition.lang = 'es-MX';
-        recognition.continuous = true;
-        recognition.interimResults = true;
-
-        recognition.onresult = (event) => {
-          let fullText = '';
-          for (let i = 0; i < event.results.length; i++) {
-            fullText += event.results[i][0].transcript + ' ';
-          }
-          fullText = fullText.trim();
-          const item = getCurrentWordObj();
-          const parsed = parseSpanishSpokenSpelling(fullText, item ? item.word : '');
-          document.getElementById('liveTranscript').textContent = `"${fullText}" → ${parsed || '...'}`;
-          if (parsed) {
-            currentAttempt = parsed;
-            renderSlots(false);
-          }
-        };
-
-        recognition.onerror = (e) => {
-          console.warn('SpeechRecognition notice:', e.error);
-        };
-
-        recognition.onend = () => {
-          if (isRecording) {
-            stopRecording();
-          }
-        };
-
-        try {
-          recognition.start();
-        } catch (e) {
-          console.warn(e);
-        }
+        startSpeechRecognitionInstance();
       } else {
-        document.getElementById('liveTranscript').textContent = 'Grabando audio de voz (usa el botón de reproducir al terminar)...';
+        renderLetterChips('Grabando audio de voz (usa el botón de reproducir al terminar)...');
       }
     }
 
     function stopRecording() {
       isRecording = false;
+      if (commitTimer) {
+        clearTimeout(commitTimer);
+        commitTimer = null;
+      }
+      if (pendingTokensQueue.length > 0) {
+        commitPendingTokens();
+      }
       const btn = document.getElementById('recordBtn');
       btn.classList.remove('recording');
       btn.innerHTML = '🎙️ Grabar mi Deletreo';
+      updatePacerBanner();
 
       if (recognition) {
-        try { recognition.stop(); } catch (e) {}
+        try { recognition.abort(); } catch (e) {}
         recognition = null;
       }
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
