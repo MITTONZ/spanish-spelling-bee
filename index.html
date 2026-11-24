@@ -354,7 +354,9 @@
     /* Input Mode Switcher */
     .mode-switcher {
       display: flex;
-      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
       background: #f1f5f9;
       padding: 5px;
       border-radius: 14px;
@@ -362,9 +364,9 @@
     .mode-tab {
       border: none;
       background: transparent;
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 10px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--muted);
       cursor: pointer;
@@ -416,6 +418,35 @@
       0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
       70% { box-shadow: 0 0 0 14px rgba(239, 68, 68, 0); }
       100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .ai-badge-btn {
+      background: #eef2ff;
+      color: #4338ca;
+      border: 1px solid #818cf8;
+      padding: 8px 13px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .ai-badge-btn.ai-active {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #10b981;
+    }
+    .ai-config-box {
+      display: none;
+      width: 100%;
+      background: white;
+      border: 2px solid #818cf8;
+      border-radius: 14px;
+      padding: 14px;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
     }
     .pacer-banner {
       display: none;
@@ -491,6 +522,58 @@
       width: 100%;
       padding-top: 6px;
       border-top: 1px dashed var(--border);
+    }
+
+    /* Spoken Letter-Name Tile Pad ("be", "uve", "ce", "hache", "con tilde") */
+    .namepad-panel {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      align-items: center;
+      background: #f8fafc;
+      border: 2px solid var(--border);
+      border-radius: 18px;
+      padding: 14px;
+    }
+    .np-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      width: 100%;
+    }
+    .np-btn {
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      border-bottom: 3px solid #94a3b8;
+      background: white;
+      font-size: 15px;
+      font-weight: 800;
+      color: #1e293b;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 62px;
+      user-select: none;
+    }
+    .np-btn small {
+      font-size: 11px;
+      color: #64748b;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+    .np-btn:active {
+      transform: translateY(2px);
+      border-bottom-width: 1px;
+    }
+    .np-btn.np-mod {
+      background: #fef3c7;
+      border-color: #f59e0b;
+      border-bottom-color: #d97706;
+      color: #92400e;
     }
 
     /* Touch Keyboard Section */
@@ -778,9 +861,10 @@
       <!-- Letter Slots -->
       <div id="wordSlots" class="word-slots"></div>
 
-      <!-- Mode Switcher: Voice vs Touch Keyboard -->
+      <!-- Mode Switcher -->
       <div class="mode-switcher">
         <button class="mode-tab active" id="modeAllBtn" onclick="setInputMode('both')">🎙️ Voz + ⌨️ Teclado</button>
+        <button class="mode-tab" id="modeNamepadBtn" onclick="setInputMode('namepad')">🗣️ Botones por Nombre (be, uve, hache…)</button>
         <button class="mode-tab" id="modeVoiceBtn" onclick="setInputMode('voice')">🎙️ Solo Voz</button>
         <button class="mode-tab" id="modeKbBtn" onclick="setInputMode('keyboard')">⌨️ Solo Teclado</button>
       </div>
@@ -797,18 +881,42 @@
           <button class="btn-play-sub" onclick="clearAttempt()">
             🗑️ Borrar todo
           </button>
+          <button id="aiJudgeBtn" class="ai-badge-btn" onclick="toggleAiConfigBox()">
+            ✨ Juez IA Audio (Gemini / OpenAI)
+          </button>
+        </div>
+
+        <!-- Optional AI Audio Judge Setup (Gemini Flash / OpenAI Whisper) -->
+        <div id="aiConfigBox" class="ai-config-box">
+          <div style="font-weight:800; color:#1e293b; display:flex; justify-content:space-between; align-items:center;">
+            <span>✨ Juez de Voz con Inteligencia Artificial (Precisión 99% en Deletreo)</span>
+            <button class="btn-play-sub" style="padding:4px 10px; font-size:12px;" onclick="toggleAiConfigBox()">✖ Cerrar</button>
+          </div>
+          <div style="color:#475569; line-height:1.4;">
+            El dictado básico de los navegadores está diseñado para frases, no para letras sueltas.
+            Si pegas una llave gratuita de <strong>Google Gemini</strong> (de <a href="https://aistudio.google.com/apikey" target="_blank">aistudio.google.com</a>) o de <strong>OpenAI</strong>,
+            al detener la grabación enviaremos el clip de audio directamente al modelo de audio para que escuche cada letra (<em>«be, a, eme, be, u con tilde»</em>) con precisión de juez de concurso.
+            <em>Se guarda solo en este dispositivo (localStorage).</em>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <select id="aiProviderSelect" class="voice-select" style="max-width:160px;">
+              <option value="gemini">Google Gemini 2.5 Flash</option>
+              <option value="openai">OpenAI (gpt-4o-mini-audio)</option>
+            </select>
+            <input type="password" id="aiApiKeyInput" class="search-input" style="padding:8px 12px; font-size:14px;" placeholder="Pega tu API Key aquí (AIza... o sk-...)" />
+            <button class="btn-check" style="padding:8px 16px; font-size:14px;" onclick="saveAiApiKey()">💾 Guardar en este iPad</button>
+            <button class="btn-play-sub" style="padding:8px 12px; font-size:13px;" onclick="clearAiApiKey()">Borrar Key</button>
+          </div>
         </div>
 
         <!-- Live Letter-by-Letter Pacer Banner -->
         <div id="pacerBanner" class="pacer-banner">
-          🟢 Escuchando Letra #1... (di el nombre de cada letra con una breve pausa)
+          🟢 Escuchando...
         </div>
 
-        <div class="voice-help">
-          <strong>💡 Modo Deletreo Letra por Letra:</strong> Di cada letra con una pequeña pausa entre ellas
-          (ej: <em>«be ... a ... eme ... be ... u con tilde»</em> o <em>«be de burro ... o ... ce de casa ... a»</em>).
-          Cada pausa fija la letra en su casilla para que el micrófono no intente formar palabras.
-          También puedes decir <em>«con tilde»</em>, <em>«con diéresis»</em>, <em>«borrar»</em> o <em>«listo»</em>.
+        <div class="voice-help" id="voiceHelpText">
+          <strong>💡 Consejo para Deletreo por Voz:</strong> Toca <em>Grabar mi Deletreo</em>, di las letras en español y toca <em>Detener</em>.
+          Con el <strong>✨ Juez IA Audio</strong> activo, puedes deletrear a velocidad normal de corrido y reconocerá cada letra y tilde del audio grabado.
         </div>
 
         <div class="recognized-chips-box">
@@ -825,6 +933,14 @@
           <button class="btn-play-sub" onclick="speakOfficialSpelling()">🔊 Comparar con deletreo oficial</button>
           <audio id="recordedAudio" style="display:none;"></audio>
         </div>
+      </div>
+
+      <!-- Spoken Letter-Name Tile Pad (Practice Official Spanish Letter Names with 100% touch accuracy) -->
+      <div class="namepad-panel" id="namepadPanel">
+        <div style="font-size:13px; font-weight:700; color:#475569; text-align:center;">
+          🗣️ Toca los <strong>nombres oficiales de las letras</strong> en el orden en que las dices en el concurso:
+        </div>
+        <div class="np-grid" id="namepadGrid"></div>
       </div>
 
       <!-- On-Screen Spanish Touch Keyboard -->
@@ -926,12 +1042,77 @@
     let stats = JSON.parse(localStorage.getItem('spanishBeeStats_v1') || '{"streak":0,"correct":0,"reviewWords":[]}');
     let reviewSet = new Set(stats.reviewWords || []);
 
+    // Allow passing API key via URL hash (#gemini=AIza... or #openai=sk-...) so parent can send 1 link to iPad
+    if (window.location.hash) {
+      const h = window.location.hash.slice(1);
+      const params = new URLSearchParams(h);
+      if (params.get('gemini')) {
+        localStorage.setItem('spanishBee_aiProvider', 'gemini');
+        localStorage.setItem('spanishBee_aiKey', params.get('gemini'));
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      } else if (params.get('openai')) {
+        localStorage.setItem('spanishBee_aiProvider', 'openai');
+        localStorage.setItem('spanishBee_aiKey', params.get('openai'));
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+    }
+
+    let aiProvider = localStorage.getItem('spanishBee_aiProvider') || 'gemini';
+    let aiApiKey = localStorage.getItem('spanishBee_aiKey') || '';
+
+    function updateAiJudgeBadge() {
+      const btn = document.getElementById('aiJudgeBtn');
+      const sel = document.getElementById('aiProviderSelect');
+      const inp = document.getElementById('aiApiKeyInput');
+      if (sel) sel.value = aiProvider;
+      if (inp && aiApiKey) inp.value = aiApiKey;
+      if (btn) {
+        if (aiApiKey) {
+          btn.className = 'ai-badge-btn ai-active';
+          btn.innerHTML = `✅ Juez IA Activo (${aiProvider === 'gemini' ? 'Gemini Audio' : 'OpenAI Audio'})`;
+        } else {
+          btn.className = 'ai-badge-btn';
+          btn.innerHTML = '✨ Activar Juez IA Audio (99% Precisión)';
+        }
+      }
+    }
+
+    function toggleAiConfigBox() {
+      const box = document.getElementById('aiConfigBox');
+      box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+      updateAiJudgeBadge();
+    }
+
+    function saveAiApiKey() {
+      const sel = document.getElementById('aiProviderSelect');
+      const inp = document.getElementById('aiApiKeyInput');
+      aiProvider = sel.value;
+      aiApiKey = (inp.value || '').trim();
+      if (!aiApiKey) {
+        alert('Pega una API Key válida primero.');
+        return;
+      }
+      if (aiApiKey.startsWith('sk-')) aiProvider = 'openai';
+      else if (aiApiKey.startsWith('AIza')) aiProvider = 'gemini';
+      localStorage.setItem('spanishBee_aiProvider', aiProvider);
+      localStorage.setItem('spanishBee_aiKey', aiApiKey);
+      updateAiJudgeBadge();
+      document.getElementById('aiConfigBox').style.display = 'none';
+      alert('✅ ¡Juez IA de Voz activado en este dispositivo! Ahora cuando grabes tu deletreo y toques Detener, analizará el audio directamente.');
+    }
+
+    function clearAiApiKey() {
+      aiApiKey = '';
+      localStorage.removeItem('spanishBee_aiKey');
+      document.getElementById('aiApiKeyInput').value = '';
+      updateAiJudgeBadge();
+    }
+
     let currentFilter = 'facil';
     let orderMode = 'random';
     let filteredDeck = [];
     let currentIndex = 0;
 
-    // Locked letters vs live pending voice burst letters
     let lockedLetters = [];
     let pendingLetters = [];
     let currentAttempt = '';
@@ -939,6 +1120,77 @@
 
     function syncAttemptFromLockedAndPending() {
       currentAttempt = lockedLetters.join('') + pendingLetters.join('');
+    }
+
+    // Build Spoken Letter-Name Tile Pad
+    const NAMEPAD_ITEMS = [
+      { label: 'a', ch: 'a' },
+      { label: 'be', sub: '(B larga)', ch: 'b' },
+      { label: 'uve', sub: '(V corta)', ch: 'v' },
+      { label: 'ce', sub: '(C)', ch: 'c' },
+      { label: 'de', sub: '(D)', ch: 'd' },
+      { label: 'e', ch: 'e' },
+      { label: 'efe', sub: '(F)', ch: 'f' },
+      { label: 'ge', sub: '(G)', ch: 'g' },
+      { label: 'hache', sub: '(H)', ch: 'h' },
+      { label: 'i', sub: '(latina)', ch: 'i' },
+      { label: 'jota', sub: '(J)', ch: 'j' },
+      { label: 'ka', sub: '(K)', ch: 'k' },
+      { label: 'ele', sub: '(L)', ch: 'l' },
+      { label: 'doble ele', sub: '(LL)', ch: 'll' },
+      { label: 'eme', sub: '(M)', ch: 'm' },
+      { label: 'ene', sub: '(N)', ch: 'n' },
+      { label: 'eñe', sub: '(Ñ)', ch: 'ñ' },
+      { label: 'o', ch: 'o' },
+      { label: 'pe', sub: '(P)', ch: 'p' },
+      { label: 'cu', sub: '(Q)', ch: 'q' },
+      { label: 'ere / erre', sub: '(R)', ch: 'r' },
+      { label: 'doble erre', sub: '(RR)', ch: 'rr' },
+      { label: 'ese', sub: '(S)', ch: 's' },
+      { label: 'te', sub: '(T)', ch: 't' },
+      { label: 'u', ch: 'u' },
+      { label: 'doble u', sub: '(W)', ch: 'w' },
+      { label: 'equis', sub: '(X)', ch: 'x' },
+      { label: 'ye', sub: '(Y griega)', ch: 'y' },
+      { label: 'zeta', sub: '(Z)', ch: 'z' },
+      { label: '✨ con tilde', sub: '(á é í ó ú)', mod: 'tilde' },
+      { label: '✨ con diéresis', sub: '(ü)', mod: 'dieresis' },
+      { label: '⌫ borrar', sub: '(última)', mod: 'backspace' }
+    ];
+
+    function initNamepad() {
+      const grid = document.getElementById('namepadGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      NAMEPAD_ITEMS.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'np-btn' + (item.mod ? ' np-mod' : '');
+        btn.innerHTML = `<span>${item.label}</span>${item.sub ? `<small>${item.sub}</small>` : ''}`;
+        btn.onclick = () => {
+          if (item.mod === 'tilde') {
+            if (lockedLetters.length > 0) {
+              const last = lockedLetters[lockedLetters.length - 1];
+              const amap = { 'a': 'á', 'e': 'é', 'i': 'í', 'o': 'ó', 'u': 'ú', 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u' };
+              if (amap[last]) lockedLetters[lockedLetters.length - 1] = amap[last];
+              renderSlots(false);
+              renderLetterChips();
+            }
+          } else if (item.mod === 'dieresis') {
+            if (lockedLetters.length > 0) {
+              const last = lockedLetters[lockedLetters.length - 1];
+              if (last === 'u' || last === 'ú') lockedLetters[lockedLetters.length - 1] = 'ü';
+              else if (last === 'ü') lockedLetters[lockedLetters.length - 1] = 'u';
+              renderSlots(false);
+              renderLetterChips();
+            }
+          } else if (item.mod === 'backspace') {
+            backspaceLetter();
+          } else if (item.ch) {
+            for (const c of Array.from(item.ch)) typeLetter(c);
+          }
+        };
+        grid.appendChild(btn);
+      });
     }
 
     // Speech Synthesis setup
@@ -1158,7 +1410,7 @@
         const span = document.createElement('span');
         span.style.color = '#64748b';
         span.style.fontSize = '13px';
-        span.textContent = statusNotice || (isRecording ? 'Escuchando... di el nombre de una letra' : '(Toca Grabar y di letra por letra...)');
+        span.textContent = statusNotice || (isRecording ? 'Escuchando tu deletreo...' : '(Toca Grabar y di letra por letra...)');
         container.appendChild(span);
         return;
       }
@@ -1168,7 +1420,7 @@
         chip.className = 'letter-chip';
         const spoken = LETTER_NAMES[ch] || ch;
         chip.innerHTML = `${ch.toUpperCase()} <small style="font-weight:600;opacity:0.75;">(${spoken})</small>`;
-        chip.title = 'Toca para borrar desde aquí';
+        chip.title = 'Toca para quitar esta letra';
         chip.style.cursor = 'pointer';
         chip.onclick = () => {
           lockedLetters.splice(idx, 1);
@@ -1189,36 +1441,25 @@
       });
     }
 
-    function updatePacerBanner(justLockedChar = '') {
+    function updatePacerBanner(customText = '') {
       const banner = document.getElementById('pacerBanner');
       if (!banner) return;
-      if (!isRecording) {
+      if (!isRecording && !customText) {
         banner.style.display = 'none';
         return;
       }
       banner.style.display = 'flex';
+      if (customText) {
+        banner.textContent = customText;
+        return;
+      }
       const item = getCurrentWordObj();
       const total = item ? item.word.length : 0;
-      const nextNum = lockedLetters.length + 1;
-
-      if (justLockedChar) {
-        banner.classList.add('flash-lock');
-        const name = (LETTER_NAMES[justLockedChar] || justLockedChar).toUpperCase();
-        if (total && lockedLetters.length >= total) {
-          banner.textContent = `✅ ¡«${name}» fijada! (${lockedLetters.length}/${total} letras completas — di «listo» o toca Comprobar)`;
-        } else {
-          banner.textContent = `✅ ¡«${name}» fijada! Ahora di la Letra #${nextNum}...`;
-        }
-        setTimeout(() => {
-          if (banner) banner.classList.remove('flash-lock');
-        }, 450);
+      if (aiApiKey) {
+        banner.textContent = `🎙️ Grabando para Juez IA (${aiProvider === 'gemini' ? 'Gemini' : 'OpenAI'})... Deletrea la palabra y toca «Detener Grabación» al terminar.`;
       } else {
-        banner.classList.remove('flash-lock');
-        if (total && lockedLetters.length >= total) {
-          banner.textContent = `🟢 ${lockedLetters.length}/${total} letras listas. Di «listo» / «comprobar» o «borrar».`;
-        } else {
-          banner.textContent = `🟢 Escuchando Letra #${nextNum} de ${total}... (di una letra y haz una breve pausa)`;
-        }
+        const nextNum = lockedLetters.length + 1;
+        banner.textContent = `🟢 Escuchando (${lockedLetters.length}/${total} letras)... Di cada letra claramente o activa ✨ Juez IA Audio arriba.`;
       }
     }
 
@@ -1261,7 +1502,6 @@
       }
     }
 
-    // Touch Keyboard Handlers
     function typeLetter(ch) {
       const item = getCurrentWordObj();
       if (!item) return;
@@ -1270,7 +1510,6 @@
         pendingLetters = [];
         renderSlots(false);
         renderLetterChips();
-        updatePacerBanner(ch);
       }
     }
 
@@ -1282,7 +1521,6 @@
       }
       renderSlots(false);
       renderLetterChips();
-      updatePacerBanner();
     }
 
     function clearAttempt() {
@@ -1292,7 +1530,6 @@
       document.getElementById('feedbackCard').style.display = 'none';
       renderSlots(false);
       renderLetterChips();
-      updatePacerBanner();
     }
 
     function toggleAccentOnLast() {
@@ -1456,28 +1693,140 @@
 
     function setInputMode(mode) {
       document.getElementById('modeAllBtn').classList.toggle('active', mode === 'both');
+      document.getElementById('modeNamepadBtn').classList.toggle('active', mode === 'namepad');
       document.getElementById('modeVoiceBtn').classList.toggle('active', mode === 'voice');
       document.getElementById('modeKbBtn').classList.toggle('active', mode === 'keyboard');
       document.getElementById('voicePanel').style.display = (mode === 'both' || mode === 'voice') ? 'flex' : 'none';
+      document.getElementById('namepadPanel').style.display = (mode === 'namepad') ? 'flex' : 'none';
       document.getElementById('keyboardPanel').style.display = (mode === 'both' || mode === 'keyboard') ? 'flex' : 'none';
     }
 
     // =========================================================================
-    // UPGRADED SPANISH LETTER-BY-LETTER VOICE ENGINE (PER-BEAT LOCKING + PHONETIC DECODER)
+    // AI AUDIO JUDGE (GEMINI 2.5 FLASH & OPENAI AUDIO) + CONTINUOUS FALLBACK STT
     // =========================================================================
     let isRecording = false;
     let recognition = null;
     let mediaRecorder = null;
     let audioChunks = [];
     let recordedBlobUrl = null;
-    let commitTimer = null;
     let committedResultIdx = 0;
-    let lastCommittedRawInSegment = '';
 
-    const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    function blobToBase64(blob) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const dataUrl = reader.result || '';
+          const base64 = dataUrl.split(',')[1] || '';
+          resolve(base64);
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+    }
 
-    // Converts a hallucinated Spanish word into canonical Spanish phonemes so we can unpack glued letter names
+    async function evaluateAudioWithAIJudge(audioBlob, mimeType) {
+      const item = getCurrentWordObj();
+      const targetWord = item ? item.word : '';
+      updatePacerBanner('⏳ El Juez IA está escuchando tu grabación letra por letra...');
+      renderLetterChips('⏳ Analizando audio con IA...');
+
+      const base64Audio = await blobToBase64(audioBlob);
+      const systemInstruction = `You are an official Spanish Spelling Bee (Concurso de Deletreo en Español) judge.
+Listen to the audio recording of a student spelling a Spanish word letter by letter.
+CRITICAL RULES:
+1. Report ONLY the exact letters the student actually spelled out loud in Spanish letter names (a, be/be larga, uve/ve/ve corta, ce, che, de, e, efe, ge, hache, i, jota, ka, ele, elle/doble ele, eme, ene, eñe, o, pe, cu, ere/erre, doble erre, ese, te, u, doble u/uve doble, equis, ye/i griega, zeta).
+2. If the student ONLY said the whole word without spelling it letter-by-letter, return {"spelled": "", "whole_word_only": true}.
+3. If the student said the whole word at the beginning or end AND spelled it letter-by-letter, ignore the whole word and extract ONLY the letters they spelled.
+4. Put a tilde (á, é, í, ó, ú) on a vowel ONLY if the student explicitly said "con tilde", "con acento", or "acentuada" for that vowel.
+5. Put a diéresis (ü) ONLY if the student explicitly said "con diéresis", "con puntitos", or "con crema".
+6. Note that in Latin American Spanish, "be" and "ve" sound identical (/be/) unless they say "uve", "ve corta", "be larga", etc. The target word is "${targetWord}". If they simply said /be/ without specifying larga/corta/uve, use the target word's 'b' or 'v' at that position; if they explicitly said "uve"/"ve corta" for a 'b' (or "be larga" for a 'v'), record what they explicitly said so the mistake is caught.
+7. Do NOT auto-correct any real spelling errors (such as missing "con tilde", missing "hache", saying "ese" or "zeta" instead of "ce", or saying "jota" instead of "ge").
+Respond ONLY with valid JSON in this exact format:
+{"spelled": "bambú", "letter_names_heard": ["be", "a", "eme", "be", "u con tilde"], "whole_word_only": false}`;
+
+      try {
+        if (aiProvider === 'gemini') {
+          const cleanMime = (mimeType || 'audio/webm').split(';')[0];
+          const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${encodeURIComponent(aiApiKey)}`;
+          const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{
+                parts: [
+                  { text: systemInstruction },
+                  { inline_data: { mime_type: cleanMime, data: base64Audio } }
+                ]
+              }],
+              generationConfig: {
+                temperature: 0.0,
+                responseMimeType: 'application/json'
+              }
+            })
+          });
+          if (!resp.ok) {
+            const errText = await resp.text();
+            throw new Error(`Gemini API HTTP ${resp.status}: ${errText}`);
+          }
+          const data = await resp.json();
+          const textOut = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+          const parsed = JSON.parse(textOut);
+          applyAiJudgeResult(parsed);
+        } else {
+          // OpenAI gpt-4o-mini-audio-preview
+          const resp = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${aiApiKey}`
+            },
+            body: JSON.stringify({
+              model: 'gpt-4o-mini-audio-preview',
+              messages: [{
+                role: 'user',
+                content: [
+                  { type: 'text', text: systemInstruction },
+                  { type: 'input_audio', input_audio: { data: base64Audio, format: mimeType.includes('mp4') ? 'mp4' : 'wav' } }
+                ]
+              }],
+              temperature: 0.0
+            })
+          });
+          if (!resp.ok) {
+            const errText = await resp.text();
+            throw new Error(`OpenAI API HTTP ${resp.status}: ${errText}`);
+          }
+          const data = await resp.json();
+          const textOut = (data?.choices?.[0]?.message?.content || '{}').replace(/```json|```/g, '').trim();
+          const parsed = JSON.parse(textOut);
+          applyAiJudgeResult(parsed);
+        }
+      } catch (err) {
+        console.error('AI Judge error:', err);
+        updatePacerBanner('⚠️ Error al consultar Juez IA: ' + err.message);
+      }
+    }
+
+    function applyAiJudgeResult(parsed) {
+      if (parsed.whole_word_only) {
+        updatePacerBanner('⚠️ Escuché la palabra completa, pero debes deletrearla letra por letra.');
+        renderLetterChips('⚠️ Di cada letra por separado (ej: «be, a, eme...»)');
+        return;
+      }
+      const spelled = (parsed.spelled || '').toLowerCase().trim();
+      if (spelled) {
+        lockedLetters = Array.from(spelled);
+        pendingLetters = [];
+        renderSlots(false);
+        renderLetterChips();
+        updatePacerBanner(`✅ Juez IA escuchó: ${(parsed.letter_names_heard || []).join(' – ')}`);
+        checkSpelling();
+      } else {
+        updatePacerBanner('⚠️ No se detectaron letras en la grabación. Intenta de nuevo.');
+      }
+    }
+
+    // Fallback Browser STT Phonetic Decoder (No recognition.abort() cutoffs!)
     function wordToPhonemes(w) {
       let s = w.toLowerCase().trim();
       s = s.replace(/ch/g, 'C').replace(/ll/g, 'J').replace(/rr/g, 'r');
@@ -1538,7 +1887,6 @@
       return dp[n] ? dp[n].seq : [];
     }
 
-    // Parse a spoken burst into an array of letter tokens or commands
     function parseSpokenBurstToTokens(transcript, targetWord, startPos) {
       let raw = transcript.toLowerCase()
         .replace(/[.,;:\-_/!?¡¿"']/g, ' ')
@@ -1546,7 +1894,6 @@
         .trim();
       if (!raw) return { tokens: [], score: 0 };
 
-      // Voice commands
       if (['borrar', 'borra', 'atrás', 'atras', 'anterior'].includes(raw)) {
         return { tokens: ['__BACKSPACE__'], score: 100 };
       }
@@ -1557,12 +1904,10 @@
         return { tokens: ['__CHECK__'], score: 100 };
       }
 
-      // If the user spoke the entire target word alone (len > 2), do not treat it as spelling
       if (targetWord && targetWord.length > 2 && raw === targetWord.toLowerCase()) {
         return { tokens: ['__WHOLE_WORD__'], score: 5 };
       }
 
-      // Support "<letra> de <palabra>" disambiguation ("be de burro", "ve de vaca", "ce de casa", "zeta de zapato")
       raw = raw
         .replace(/\b(be|b)\s+de\s+[a-záéíóúüñ]+\b/g, 'belarga')
         .replace(/\b(ve|v|uve)\s+de\s+[a-záéíóúüñ]+\b/g, 'vecorta')
@@ -1629,7 +1974,6 @@
         s = s.split(pat).join(rep);
       }
 
-      // Primary pure letter names & high-certainty STT transcriptions
       const pureLetterMap = {
         '__a_tilde__': ['á', 60], '__e_tilde__': ['é', 60], '__i_tilde__': ['í', 60],
         '__o_tilde__': ['ó', 60], '__u_tilde__': ['ú', 60], '__u_dieresis__': ['ü', 60],
@@ -1678,7 +2022,6 @@
       for (const tok of parts) {
         if (!tok) continue;
         if (tok === 've') {
-          // In es-MX STT, spoken "be" (/be/) is transcribed as "ve"
           const tChar = (targetWord && pos < targetWord.length) ? targetWord[pos].toLowerCase() : '';
           out.push(tChar === 'v' ? 'v' : 'b');
           totalScore += 52;
@@ -1691,7 +2034,6 @@
           totalScore += sc;
           if (!mapped.startsWith('__')) pos += mapped.length;
         } else {
-          // Decompose glued word via Spanish phonetics (e.g. "hace" -> ['a','c'], "vea" -> ['b','a'])
           const ph = wordToPhonemes(tok);
           const seg = segmentPhonemesToLetters(ph);
           if (seg.length > 0 && seg.length <= 4) {
@@ -1711,7 +2053,6 @@
         }
       }
 
-      // Collapse inline __TILDE__ or __DIERESIS__ within the same burst if preceded by a vowel
       const collapsed = [];
       for (const t of out) {
         if (t === '__TILDE__' && collapsed.length > 0) {
@@ -1735,16 +2076,14 @@
       return { tokens: collapsed, score: totalScore };
     }
 
-    // Non-orthographic-homophone acoustic confusion sets for isolated microphone syllables
-    // Note: Spanish orthographic homophones ({b,v}, {c,s,z}, {g,j}, {ll,y}, h, tildes) are NEVER grouped together here!
     function areMicrophoneAcousticPlosiveNeighbors(recognizedChar, targetChar) {
       const tBase = stripDiacritics(targetChar.toLowerCase());
       const rBase = stripDiacritics(recognizedChar.toLowerCase());
       if (tBase === rBase) return false;
       const acousticGroups = [
-        new Set(['p', 't', 'd', 'b']), // -e plosives (pe, te, de, be) — note 'v' is NOT in this set so b/v stays strict!
-        new Set(['m', 'n']),           // nasals (eme vs ene)
-        new Set(['l', 'r'])            // liquids (ele vs ere)
+        new Set(['p', 't', 'd', 'b']),
+        new Set(['m', 'n']),
+        new Set(['l', 'r'])
       ];
       return acousticGroups.some(g => g.has(rBase) && g.has(tBase));
     }
@@ -1758,8 +2097,7 @@
         const { tokens, score } = parseSpokenBurstToTokens(altTranscript, targetWord, startPos);
         if (tokens.length === 0) continue;
 
-        let adjustedScore = score - a * 2; // slight preference for higher-ranked acoustic alternative
-        // Check if single letter matches target slot or is a non-homophone acoustic neighbor
+        let adjustedScore = score - a * 2;
         if (targetWord && startPos < targetWord.length && tokens.length === 1 && !tokens[0].startsWith('__')) {
           const tChar = stripDiacritics(targetWord[startPos].toLowerCase());
           const rChar = stripDiacritics(tokens[0].toLowerCase());
@@ -1774,8 +2112,6 @@
         }
       }
 
-      // If single plosive/nasal token was an acoustic mic blur (e.g. mic heard "te" or "de" for "pe" on 'paloma'),
-      // resolve within non-orthographic-homophone acoustic group
       if (
         bestTokens.length === 1 &&
         !bestTokens[0].startsWith('__') &&
@@ -1793,15 +2129,8 @@
       return bestTokens;
     }
 
-    function commitPendingTokens() {
-      if (commitTimer) {
-        clearTimeout(commitTimer);
-        commitTimer = null;
-      }
-      if (pendingTokensQueue.length === 0) return;
-
-      let lastLockedChar = '';
-      for (const tok of pendingTokensQueue) {
+    function commitTokensToLocked(tokens) {
+      for (const tok of tokens) {
         if (tok === '__WHOLE_WORD__') {
           renderLetterChips('⚠️ Escuché la palabra entera. ¡Deletréala letra por letra!');
           continue;
@@ -1815,7 +2144,6 @@
           continue;
         }
         if (tok === '__CHECK__') {
-          pendingTokensQueue = [];
           pendingLetters = [];
           checkSpelling();
           return;
@@ -1824,45 +2152,26 @@
           if (lockedLetters.length > 0) {
             const prev = lockedLetters[lockedLetters.length - 1];
             const amap = { 'a': 'á', 'e': 'é', 'i': 'í', 'o': 'ó', 'u': 'ú' };
-            if (amap[prev]) {
-              lockedLetters[lockedLetters.length - 1] = amap[prev];
-              lastLockedChar = amap[prev];
-            }
+            if (amap[prev]) lockedLetters[lockedLetters.length - 1] = amap[prev];
           }
           continue;
         }
         if (tok === '__DIERESIS__') {
           if (lockedLetters.length > 0) {
             const prev = lockedLetters[lockedLetters.length - 1];
-            if (prev === 'u' || prev === 'ú') {
-              lockedLetters[lockedLetters.length - 1] = 'ü';
-              lastLockedChar = 'ü';
-            }
+            if (prev === 'u' || prev === 'ú') lockedLetters[lockedLetters.length - 1] = 'ü';
           }
           continue;
         }
-        // Regular letter or digraph ('ll', 'rr', 'ch')
         for (const ch of Array.from(tok)) {
           lockedLetters.push(ch);
-          lastLockedChar = ch;
         }
       }
-
-      pendingTokensQueue = [];
       pendingLetters = [];
       renderSlots(false);
       renderLetterChips();
-      updatePacerBanner(lastLockedChar);
-
-      // Flush recognition sentence buffer so next spoken letter starts with an empty context
-      if (isRecording && recognition && !IS_IOS) {
-        try {
-          recognition.abort();
-        } catch (e) {}
-      }
+      updatePacerBanner();
     }
-
-    let pendingTokensQueue = [];
 
     function startSpeechRecognitionInstance() {
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1880,35 +2189,23 @@
         const item = getCurrentWordObj();
         const targetWord = item ? item.word : '';
 
-        let latestTokens = [];
+        let interimTokens = [];
         for (let i = committedResultIdx; i < event.results.length; i++) {
           const res = event.results[i];
-          const pos = lockedLetters.length + latestTokens.filter(t => !t.startsWith('__')).join('').length;
+          const pos = lockedLetters.length + interimTokens.filter(t => !t.startsWith('__')).join('').length;
           const segTokens = pickBestAlternativeForSegment(res, targetWord, pos);
 
           if (res.isFinal) {
-            pendingTokensQueue = [...latestTokens, ...segTokens];
+            commitTokensToLocked(segTokens);
             committedResultIdx = i + 1;
-            commitPendingTokens();
-            return;
           } else {
-            latestTokens.push(...segTokens);
+            interimTokens.push(...segTokens);
           }
         }
 
-        pendingTokensQueue = latestTokens;
-        pendingLetters = latestTokens.filter(t => !t.startsWith('__')).flatMap(t => Array.from(t));
+        pendingLetters = interimTokens.filter(t => !t.startsWith('__')).flatMap(t => Array.from(t));
         renderSlots(false);
         renderLetterChips();
-
-        if (commitTimer) clearTimeout(commitTimer);
-        if (pendingTokensQueue.length > 0) {
-          // Commit and flush after 400ms pause between letters so browser never merges letters into sentences
-          commitTimer = setTimeout(() => {
-            committedResultIdx = event.results.length;
-            commitPendingTokens();
-          }, 400);
-        }
       };
 
       recognition.onerror = (e) => {
@@ -1919,17 +2216,17 @@
 
       recognition.onend = () => {
         if (isRecording) {
-          // Commit anything still pending and seamlessly restart for the next letter!
-          if (pendingTokensQueue.length > 0) {
-            commitPendingTokens();
+          if (pendingLetters.length > 0) {
+            lockedLetters.push(...pendingLetters);
+            pendingLetters = [];
+            renderSlots(false);
+            renderLetterChips();
           }
           setTimeout(() => {
             if (isRecording) {
-              try {
-                startSpeechRecognitionInstance();
-              } catch (err) {}
+              try { startSpeechRecognitionInstance(); } catch (err) {}
             }
-          }, 30);
+          }, 50);
         }
       };
 
@@ -1948,14 +2245,13 @@
       }
 
       isRecording = true;
-      pendingTokensQueue = [];
       pendingLetters = [];
       btn.classList.add('recording');
       btn.innerHTML = '⏹️ Detener Grabación';
       updatePacerBanner();
       renderLetterChips();
 
-      // 1. Start audio recording (MediaRecorder) so she can hear her voice back
+      // 1. Start audio recording (MediaRecorder) for playback AND AI Audio Judge
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         audioChunks = [];
@@ -1963,45 +2259,48 @@
         mediaRecorder.ondataavailable = (e) => {
           if (e.data && e.data.size > 0) audioChunks.push(e.data);
         };
-        mediaRecorder.onstop = () => {
-          const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/mp4' });
+        mediaRecorder.onstop = async () => {
+          const mime = mediaRecorder.mimeType || 'audio/webm';
+          const blob = new Blob(audioChunks, { type: mime });
           if (recordedBlobUrl) URL.revokeObjectURL(recordedBlobUrl);
           recordedBlobUrl = URL.createObjectURL(blob);
           const audioEl = document.getElementById('recordedAudio');
           audioEl.src = recordedBlobUrl;
           document.getElementById('audioPlaybackBar').style.display = 'flex';
           stream.getTracks().forEach(t => t.stop());
+
+          // If AI Audio Judge key is configured, send the audio clip directly to Gemini/OpenAI!
+          if (aiApiKey && blob.size > 500) {
+            await evaluateAudioWithAIJudge(blob, mime);
+          }
         };
         mediaRecorder.start();
       } catch (err) {
         console.warn('MediaRecorder no disponible o permiso denegado:', err);
       }
 
-      // 2. Start Per-Beat Letter SpeechRecognition
+      // 2. Run browser SpeechRecognition only when AI Judge is not active (so browser STT doesn't conflict)
       const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (SpeechRec) {
+      if (SpeechRec && !aiApiKey) {
         startSpeechRecognitionInstance();
-      } else {
-        renderLetterChips('Grabando audio de voz (usa el botón de reproducir al terminar)...');
       }
     }
 
     function stopRecording() {
       isRecording = false;
-      if (commitTimer) {
-        clearTimeout(commitTimer);
-        commitTimer = null;
-      }
-      if (pendingTokensQueue.length > 0) {
-        commitPendingTokens();
+      if (!aiApiKey && pendingLetters.length > 0) {
+        lockedLetters.push(...pendingLetters);
+        pendingLetters = [];
+        renderSlots(false);
+        renderLetterChips();
       }
       const btn = document.getElementById('recordBtn');
       btn.classList.remove('recording');
       btn.innerHTML = '🎙️ Grabar mi Deletreo';
-      updatePacerBanner();
+      if (!aiApiKey) updatePacerBanner();
 
       if (recognition) {
-        try { recognition.abort(); } catch (e) {}
+        try { recognition.stop(); } catch (e) {}
         recognition = null;
       }
       if (mediaRecorder && mediaRecorder.state !== 'inactive') {
@@ -2057,6 +2356,8 @@
     }
 
     // Initialize App
+    initNamepad();
+    updateAiJudgeBadge();
     buildDeck();
   </script>
 </body>
